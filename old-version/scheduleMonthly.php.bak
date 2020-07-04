@@ -1,0 +1,576 @@
+<?php
+if (!isset($_COOKIE['minus'])) {
+  setcookie("minus", 0);
+}
+// Connect to the database
+$servername = "localhost";
+$username = "root";
+$password = "Mintylucky9";
+$dbname = "neurospine";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+// Select all entries about calendar where the users email matches
+$sql = "SELECT * FROM calendar WHERE email LIKE '" . $_COOKIE['email'] . "';";
+
+// Retrieve results and close connection
+// This data will be used later for manipulation
+$result = $conn->query($sql);
+$conn->close();
+
+// Put all of the days of the week in a table for stuff - can't remember why
+$days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+// Put all of the data from the mySql table into non associative arrays for
+// easier manipulation and presentation
+
+// List of time starting times
+$timeListStart = [];
+
+// List of time closing times
+$timeListEnd = [];
+
+// List of titles given to the appointments
+$timeListName = [];
+
+// Type of appointment - consultation or surgery
+$timeListType = [];
+
+// Type of appointment - consultation or surgery
+$typeList = [];
+
+// List of dates - eg 27/05/2020
+$dateList = [];
+
+// foreach loop to put all of the usable info from the associative mysql array
+// into the lists/arrays described above
+foreach ($result as $row){
+  array_push($timeListStart,$row['start']);
+  array_push($timeListEnd,$row['end']);
+  array_push($timeListName,$row['name']);
+  array_push($typeList,$row['type']);
+  array_push($dateList, $row['date']);
+}
+
+// This is used to create the refernece point
+// The program needs to work from the first of the month so it counts the number
+// of days in a month then gets the first day of the month and counts acorss until
+// it finds the first of the month. Once the first day has been found it starts
+// printing numbers starting from 1 and ending on $maxDays
+
+// Sample expression
+$sampleExpression = "1 May 2020";
+
+// Running count of how far back you want to go
+$minusCount = 0;
+
+// Current year
+$year = date('Y');
+
+// If the user clicks on the arrow to change the month view
+if (isset($_POST['changeMonth'])) {
+  $change = $_POST['changeMonth'];
+
+  // check whether or not they want to go back or forward a month
+  if ($change == "minus") {
+
+    // Theres a running increment of the amount of months that have been minused
+    $value = $_COOKIE['minus'] + 1;
+    setcookie("minus", $value);
+
+  } else {
+    // If there is no minus set - reset the counter to 0
+    setcookie("minus", 0);
+
+    /// get max number of days in the month
+    $maxDays = cal_days_in_month(CAL_GREGORIAN, date('m'), $year);
+
+    // Take the current date away from the max number of days to go to the previous month
+    $changeDays = $maxDays - date('d');
+    $changeDays += 1;
+    $changeDaysExpression = "+" . $changeDays . ' days';
+  }
+
+}
+
+echo $_COOKIE['minus'];
+
+// Current month - date('n') gives month without leading 0s. date('m') does
+// eg 1 compared to 01 for january
+// date('F') gives the month in full text form eg January
+if (isset($_POST['changeMonth'])){
+    $monthNum = date('m') - $_COOKIE['minus'];
+    $month = date('F', strtotime("1-" . $monthNum . "-2020"));
+    echo $month;
+} else {
+  $monthNum = date('m');
+  $month = date('F');
+}
+
+// first date of the month
+$date = "1";
+
+// real expression
+$expression = $date . ' ' . $month . ' ' . $year;
+echo $expression;
+
+// first day given all of the other values
+$firstDay = date('l', strtotime($expression));
+$count = 0;
+
+// get max number of days in the month
+$maxDays = cal_days_in_month(CAL_GREGORIAN, $monthNum, $year);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Scanorama</title>
+
+  <!-- Custom fonts for this template-->
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="css/sb-admin-2.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+      <!-- Sidebar - Brand -->
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
+        <div class="sidebar-brand-icon rotate-n-15">
+          <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">Scanorama</div>
+      </a>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider my-0">
+
+      <!-- Nav Item - Dashboard -->
+      <li class="nav-item">
+        <a class="nav-link" href="index.php">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Dashboard</span></a>
+      </li>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Heading -->
+      <div class="sidebar-heading">
+        Actions
+      </div>
+
+
+      <!-- Nav Item - scan -->
+      <li class="nav-item">
+        <a class="nav-link" href="uploadPDF.php">
+          <i class="fas fa-fw fa-camera"></i>
+          <span>Scan Documents</span></a>
+      </li>
+
+      <!-- Nav Item - scan -->
+      <li class="nav-item">
+        <a class="nav-link" href="view.php">
+          <i class="fas fa-fw fa-eye"></i>
+          <span>View Documents</span></a>
+      </li>
+
+      <!-- Nav Item - scan -->
+      <li class="nav-item">
+        <a class="nav-link" href="users.php">
+          <i class="fas fa-fw fa-user"></i>
+          <span>Manage users</span></a>
+      </li>
+
+      <li class="nav-item active">
+        <a class="nav-link" href="scheduleMonthly.php">
+          <i class="fas fa-fw fa-calendar"></i>
+          <span>View Calendar</span></a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="scheduleItem.php">
+          <i class="fas fa-fw fa-calendar"></i>
+          <span>Manage Calendar</span></a>
+      </li>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Nav Item - scan -->
+
+      <li class="nav-item">
+        <a class="nav-link" href="tickets.php">
+          <i class="fas fa-fw fa-ticket-alt"></i>
+          <span>Manage Tickets</span></a>
+      </li>
+
+    </ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+          <!-- Sidebar Toggle (Topbar) -->
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+
+          <!-- Topbar Search -->
+          <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+            <div class="input-group">
+              <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+              <div class="input-group-append">
+                <button class="btn btn-primary" type="button">
+                  <i class="fas fa-search fa-sm"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Topbar Navbar -->
+          <ul class="navbar-nav ml-auto">
+
+            <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+            <li class="nav-item dropdown no-arrow d-sm-none">
+              <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-search fa-fw"></i>
+              </a>
+              <!-- Dropdown - Messages -->
+              <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
+                <form class="form-inline mr-auto w-100 navbar-search">
+                  <div class="input-group">
+                    <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                      <button class="btn btn-primary" type="button">
+                        <i class="fas fa-search fa-sm"></i>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </li>
+
+
+          </ul>
+
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+              <!-- Start card info -->
+              <!-- Card -->
+              <div class="row">
+
+                <!-- Left hand side -->
+                <div class="col-sm-12">
+
+                  <!-- Start card info -->
+                  <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <div class="row">
+                      <div class="col-sm-4">
+                        <a href="scheduleItem.php">
+                          <button class="btn btn-warning">Add item</button>
+                        </a>
+                      </div>
+                      <div class="col-sm-4 text-center">
+                        <h2>
+                        <?php echo date('d/m/Y'); ?>
+                      </h2>
+                      </div>
+
+                  <div class="col-sm-2">
+                    <a href="scheduleDaily.php">
+                      <button class="btn btn-primary">
+                      Daily
+                    </button>
+                  </a>
+                  </div>
+
+                  <div class="col-sm-2">
+                    <a href="scheduleMonthly.php">
+                    <button class="btn btn-primary">
+                      Monthly
+                    </button>
+                  </a>
+                  </div>
+                </div>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-12">
+                      <form action="scheduleDaily.php" method="post">
+                <table style="table-layout: fixed;" class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col">Monday</th>
+                      <th scope="col">Tuesday</th>
+                      <th scope="col">Wednesday</th>
+                      <th scope="col">Thursday</th>
+                      <th scope="col">Friday</th>
+                      <th scope="col">Saturday</th>
+                      <th scope="col">Sunday</th>
+
+
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                    <?php
+                    // Loop through the list of available days until the current
+                    // selected day == the first day of the month - then start counting
+                    while ($days[$count] != $firstDay) {
+                      echo '<th scope="col"></th>';
+                      $count += 1;
+                    }
+
+                    // The currnet day increments by one each day. $dayCounter keeps track of this
+                    $dayCounter = 1;
+
+
+                    // Print out days of the month
+                    while ($dayCounter <= $maxDays) {
+
+                      // Count total numbers of activities on a day
+                      $countInstances = 0;
+
+                      // Count number of consultations
+                      $consultationInstances = 0;
+
+                      // Count number of surgeries
+                      $surgeryInstances = 0;
+
+                      // increment to the next item on the $typeList array if the one before
+                      // it has been dealt with
+                      $indexCounter = 0;
+
+                      // Check if there are any activities on the day
+                      foreach ($dateList as $testDate) {
+
+                        // This formula is used to test the current selected date
+                        // against the list of dates that have activites
+                        // Probable could be more effecient
+                        $formula = $dayCounter . "/" . $monthNum . "/" . $year;
+
+                        // if list of activities date == selected date then:
+                        if ($testDate == $formula) {
+
+                          // Increment number of total activites by 1
+                          $countInstances += 1;
+
+                          // Figure out whether or not the activity is a consultation or surgery
+                          if ($typeList[$indexCounter] == "consultation") {
+
+                            // Increment by 1
+                            $consultationInstances += 1;
+                          } else {
+                            $surgeryInstances += 1;
+                          }
+                        }
+
+                        // After checking the current date in the dateList array
+                        // Increment to the one after it so that the other lists
+                        // are in sync with the foreach statement
+                        $indexCounter += 1;
+                      }
+
+                      // if there are no surgeries that day create a blank string
+                      if ($surgeryInstances == 0){
+                        $surgeryInstances = '';
+                      }
+
+                      // same for consultations
+                      if ($consultationInstances == 0){
+                        $consultationInstances = '';
+                      }
+
+                      // Highlight today
+                      // If there activites are greater than 0
+                      if ($countInstances > 0){
+
+                        // if selected date == current date then highlight it
+                        if ($dayCounter == date('d')) {
+
+                        echo '<th style="background-color:#e0fcff;" scope="col">
+                        <div class="row">';
+
+                        // create a col-sm-4 and align it center with my-auto class
+                        // button is used to convey info to daily view calendar
+                        echo '<div class="col-sm-4 my-auto">
+                        <button type="submit" class="btn btn-outline-info" name="date" value="' . $dayCounter . '/' . $monthNum . '/' . $year . '">';
+                        echo $dayCounter;
+                        echo '</button>
+                        </div>
+                        <div class="col-sm-4 my-auto">
+                        <span class="text-success">' . $consultationInstances;
+                        echo '</span></div>';
+                        echo '<div class="col-sm-4 my-auto">
+                        <span class="text-danger">' . $surgeryInstances . '</span></div>
+                        </div>
+                        </th>';
+                        // if the selected date != today then create the same
+                        // table data as before but don't highlight the cell
+                      } else {
+                      echo '<th scope="col">
+                      <div class="row">
+                      <div class="col-sm-4 my-auto">
+                      <button type="submit" class="btn btn-outline-info" name="date" value="' . $dayCounter . '/' . $monthNum . '/' . $year . '">
+                      ' . $dayCounter . '
+                      </button>
+                      </div>
+                      <div class="col-sm-4 my-auto">
+                       <span class="text-success">' . $consultationInstances . '</span>
+                       </div>
+                       <div class="col-sm-4 my-auto">
+                       <span class="text-danger">
+                       ' . $surgeryInstances . '
+                       </span>
+                      </div>
+
+                      </div>
+                      </th>';
+                    }
+
+                    // create a new line if the day gets to sunday
+                    // increment the $dayCounter by 1 and increment the $count by 1
+                    // use $count to check whether or not you're at the end of the week
+                      $dayCounter += 1;
+                      $count += 1;
+                      if ($count%7==0) {
+                        // if at the end of the week create a new line
+                        echo '</tr><tr>';
+                      }
+
+                      // else if there are no activities in the selected day
+                  } else {
+                    // if the current day == selected day then highlight current day
+                    if ($dayCounter == date('d')) {
+                    echo '<th style="background-color:#e0fcff;" scope="col">
+                    <div class="row">
+                    <div class="col-sm-4 my-auto">
+                    <button type="submit" class="btn btn-outline-info" name="date" value="' . $dayCounter . '/' . $monthNum . '/' . $year . '">';
+                    echo $dayCounter;
+                    echo '</button>
+                    </div>
+                    <div class="col-sm-8"></div>
+                    </div>
+                    </th>';
+
+                    // if the current day != selected day then don't highlight current day
+                  } else {
+                  echo '<th scope="col">
+                  <div class="row">
+                  <div class="col-sm-4">
+                  <button type="submit" class="btn btn-outline-info" name="date" value="' . $dayCounter . '/' . $monthNum . '/' . $year . '">
+                  ' . $dayCounter . '
+                  </button>
+                  </div>
+                  <div class="col-sm-8">
+                  </div>
+
+                  </th>';
+                }
+
+                // check again if we need to create a new line for a new week
+                  $dayCounter += 1;
+                  $count += 1;
+                  if ($count%7==0) {
+                    echo '</tr><tr>';
+                  }
+                }
+              }
+                     ?>
+                   </tr>
+                  </tbody>
+                </table>
+              </form>
+              </div>
+              </div>
+
+              <form action="" method="post">
+              <div class="row">
+                <div class="col-sm-1">
+                  <button type="submit" name="changeMonth" value="minus" class="btn btn-danger">
+                    <i class="fas fa-arrow-left"></i>
+                  </button>
+                </div>
+              </form>
+
+                <div class="col-sm-10 text-center">
+                  <form action="">
+                    <input class="form-control" type="text" placeholder="15/08/2020..."><small>Go to date:</small>
+                  </form>
+                </div>
+
+                <form action="" method="post">
+                <div class="col-sm-1">
+                  <button tyoe="submit" name="changeMonth" value="plus" class="btn btn-danger">
+                    <i class="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+        <!-- /.container-fluid -->
+
+      </div>
+
+      <!-- End of Main Content -->
+
+
+      <!-- End of Footer -->
+
+
+    <!-- End of Content Wrapper -->
+
+
+  <!-- End of Page Wrapper -->
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin-2.min.js"></script>
+
+</body>
+
+</html>
