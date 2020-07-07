@@ -16,10 +16,12 @@ My solutions:
 3) I want to create a "pinging" or "tagging" system. Whenever an action is taken by either the doctor or patient, either can choose to tag another doctor/patient in the report. This means whoever is tagged has access to that file. They can also tag other doctors/patients. Only one copy of the file exists and it exists in the creators account. This reduces the amount of time finding email addresses and sending emails or finding addresses and posting letters. Recipients can still email and download the file/letter, however the ideal situation is that all doctors/patients use the system to send documents to each other. 
 
 File navigation help:
-|- medhub
-  | - start
-    | - hospital.php (this is the template for hospital search)
-    | - hospitalUser.php (this is a template for the hospital homagage)
-    | - index.php (template for dashboard)
-    | - report
+medhub
+|-- start
+|   |-- userProfile.php (user profile)
+|   |-- hospital.php (hospital search)
+|   |-- index.php (dashboard)
+|   |-- hospitalUser.php (hospital profile)
+|   `-- reportUser.php (show reports)
+
 This is for patch ✊
