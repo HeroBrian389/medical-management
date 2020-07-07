@@ -18,10 +18,10 @@ My solutions:
 File navigation help:
 medhub
 |-- start
-|   |-- userProfile.php (user profile)
-|   |-- hospital.php (hospital search)
-|   |-- index.php (dashboard)
-|   |-- hospitalUser.php (hospital profile)
-|   `-- reportUser.php (show reports)
+|   |-- userProfile.php (user profile) http://neurospine.cf/medhub/start/userProfile.php
+|   |-- hospital.php (hospital search) http://neurospine.cf/medhub/start/hospital.php
+|   |-- index.php (dashboard) http://neurospine.cf/medhub/start/index.php
+|   |-- hospitalUser.php (hospital profile) http://neurospine.cf/medhub/start/hospitalUser.php
+|   -- reportUser.php (show reports) http://neurospine.cf/medhub/start/reportUser.php
 
 This is for patch ✊
