@@ -3801,6 +3801,7 @@ input[type="button"].btn-block {
   opacity: 0;
 }
 
+
 .custom-file-input:focus ~ .custom-file-label {
   border-color: #bac8f3;
   box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
@@ -10459,7 +10460,7 @@ a:focus {
   font-size: 0.65rem;
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 1200px) {
   .sidebar {
     width: 14rem !important;
   }
@@ -10819,7 +10820,7 @@ a:focus {
 }
 
 .bg-register-image {
-  background: url("https://source.unsplash.com/Mv9hjnEUHR4/600x800");
+  background: url("../img/doctor.jpg");
   background-position: center;
   background-size: cover;
 }
@@ -10838,6 +10839,10 @@ form.user .form-control-user {
   font-size: 0.8rem;
   border-radius: 10rem;
   padding: 1.5rem 1rem;
+}
+
+.form-control-list {
+  border-radius: 10rem;
 }
 
 form.user .btn-user {

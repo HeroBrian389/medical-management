@@ -1,3 +1,27 @@
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "Mintylucky9";
+$dbname = "medhub";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+    echo ("Connection failed: " . $conn->connect_error);
+}
+
+
+if (isset($_GET['search'])) {
+  $search = $_GET['search'];
+  $sql = "SELECT * FROM hospitalData WHERE name LIKE '%" . $search . "%'";
+} else {
+  $sql = "SELECT * FROM hospitalData;";
+}
+
+$result = $conn->query($sql);
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,7 +33,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SB Admin 2 - Dashboard</title>
+  <title>Medhub</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -40,20 +64,20 @@
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="dashboard.php">
         <div class="sidebar-brand-icon rotate-n-15">
-          <i class="fas fa-laugh-wink"></i>
+          <i class="fas fa-list"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+        <div class="sidebar-brand-text mx-3">Medhub</div>
       </a>
 
       <!-- Divider -->
       <hr class="sidebar-divider my-0">
 
       <!-- Nav Item - Dashboard -->
-      <li class="nav-item active">
-        <a class="nav-link" href="index.html">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
+      <li class="nav-item">
+        <a class="nav-link" href="dashboard.php">
+          <i class="fas fa-fw fa-home"></i>
           <span>Dashboard</span></a>
       </li>
 
@@ -62,39 +86,28 @@
 
       <!-- Heading -->
       <div class="sidebar-heading">
-        Interface
+        Your info
       </div>
 
       <!-- Nav Item - Pages Collapse Menu -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+        <a class="nav-link" href="
+        <?php
+        if (isset($_COOKIE['firstName'])){
+          echo "userProfile.php";
+        } else {
+          echo "hospitalUser.php";
+        }
+        ?>
+        ">
           <i class="fas fa-fw fa-cog"></i>
-          <span>Components</span>
-        </a>
-        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Custom Components:</h6>
-            <a class="collapse-item" href="buttons.html">Buttons</a>
-            <a class="collapse-item" href="cards.html">Cards</a>
-          </div>
-        </div>
+          <span>Profile</span></a>
       </li>
 
-      <!-- Nav Item - Utilities Collapse Menu -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
-          <i class="fas fa-fw fa-wrench"></i>
-          <span>Utilities</span>
-        </a>
-        <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Custom Utilities:</h6>
-            <a class="collapse-item" href="utilities-color.html">Colors</a>
-            <a class="collapse-item" href="utilities-border.html">Borders</a>
-            <a class="collapse-item" href="utilities-animation.html">Animations</a>
-            <a class="collapse-item" href="utilities-other.html">Other</a>
-          </div>
-        </div>
+        <a class="nav-link" href="error.php">
+          <i class="fas fa-fw fa-clipboard"></i>
+          <span>Reports</span></a>
       </li>
 
       <!-- Divider -->
@@ -102,41 +115,21 @@
 
       <!-- Heading -->
       <div class="sidebar-heading">
-        Addons
+        Hospitals
       </div>
 
-      <!-- Nav Item - Pages Collapse Menu -->
+
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-          <i class="fas fa-fw fa-folder"></i>
-          <span>Pages</span>
-        </a>
-        <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Login Screens:</h6>
-            <a class="collapse-item" href="login.html">Login</a>
-            <a class="collapse-item" href="register.html">Register</a>
-            <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
-            <div class="collapse-divider"></div>
-            <h6 class="collapse-header">Other Pages:</h6>
-            <a class="collapse-item" href="404.html">404 Page</a>
-            <a class="collapse-item" href="blank.html">Blank Page</a>
-          </div>
-        </div>
+        <a class="nav-link" href="error.php">
+          <i class="fas fa-fw fa-list-ul"></i>
+          <span>Manage</span></a>
       </li>
 
       <!-- Nav Item - Charts -->
-      <li class="nav-item">
-        <a class="nav-link" href="charts.html">
-          <i class="fas fa-fw fa-chart-area"></i>
-          <span>Charts</span></a>
-      </li>
-
-      <!-- Nav Item - Tables -->
-      <li class="nav-item">
-        <a class="nav-link" href="tables.html">
-          <i class="fas fa-fw fa-table"></i>
-          <span>Tables</span></a>
+      <li class="nav-item active">
+        <a class="nav-link" href="">
+          <i class="fas fa-fw fa-eye"></i>
+          <span>View</span></a>
       </li>
 
       <!-- Divider -->
@@ -160,7 +153,7 @@
         <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
           <!-- Sidebar Toggle (Topbar) -->
-          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+          <button id="sidebarToggleTop" class="btn btn-link d-lg-none rounded-circle mr-3">
             <i class="fa fa-bars"></i>
           </button>
 
@@ -201,8 +194,16 @@
 
 
             <li class="nav-item my-auto mx-3 text-center">
-              <a href="">
-                <p class="text-primary my-auto">
+              <a href="
+              <?php
+              if (isset($_COOKIE['firstName'])){
+                echo "userProfile.php";
+              } else {
+                echo "hospitalUser.php";
+              }
+              ?>
+              ">
+                <p class="text-muted my-auto">
                 <i class="fas fa-home fa-fw mx-1 mx-auto"></i>
                 <span class="mx-2 hide-nav-home small">Home</span>
               </p>
@@ -211,7 +212,7 @@
 
             <li class="nav-item my-auto mx-3 text-center">
               <a href="">
-                <p class="text-muted my-auto">
+                <p class="text-primary my-auto">
                 <i class="fas fa-hospital fa-fw mx-1"></i>
                 <span class="mx-2 hide-nav-hospital small">Hospitals</span>
               </p>
@@ -219,7 +220,7 @@
             </li>
 
             <li class="nav-item my-auto mx-3 text-center">
-              <a href="">
+              <a href="patientSearch.php">
                 <p class="text-muted my-auto">
                 <i class="fas fa-user fa-fw mx-1"></i>
                 <span class="mx-2 hide-nav-patients small">Patients</span>
@@ -228,7 +229,7 @@
             </li>
 
             <li class="nav-item my-auto mx-3 text-center">
-              <a href="">
+              <a href="error.php">
                 <p class="text-muted my-auto">
                 <i class="fas fa-comment fa-fw mx-1"></i>
                 <span class="mx-2 hide-nav-messaging small">Messaging</span>
@@ -237,7 +238,7 @@
             </li>
 
             <!-- Nav Item - Alerts -->
-            <li class="nav-item dropdown no-arrow mx-1">
+            <li class="nav-item dropdown no-arrow mx-1 text-muted">
               <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>
                 <!-- Counter - Alerts -->
@@ -255,8 +256,8 @@
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 12, 2019</div>
-                    <span class="font-weight-bold">A new monthly report is ready to download!</span>
+                    <div class="small text-gray-500">8/7/20</div>
+                    Brian Kelleher uploaded a report
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -266,8 +267,8 @@
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 7, 2019</div>
-                    $290.29 has been deposited into your account!
+                    <div class="small text-gray-500">6/7/20</div>
+                    Aylesbury clinic tagged you in a report
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -277,8 +278,8 @@
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 2, 2019</div>
-                    Spending Alert: We've noticed unusually high spending for your account.
+                    <div class="small text-gray-500">5/7/20</div>
+                    Invoice outstanding for 30 days for patient <span class="font-weight-bold text-primary">Derek</span> for €290
                   </div>
                 </a>
                 <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
@@ -302,9 +303,9 @@
                     <img class="rounded-circle" src="https://source.unsplash.com/fn_BT9fwg_E/60x60" alt="">
                     <div class="status-indicator bg-success"></div>
                   </div>
-                  <div class="font-weight-bold">
-                    <div class="text-truncate">Hi there! I am wondering if you can help me with a problem I've been having.</div>
-                    <div class="small text-gray-500">Emily Fowler · 58m</div>
+                  <div class="">
+                    <div class="text-truncate">Hi, I have a question about my appointment with Dr. Kelleher.</div>
+                    <div class="small text-gray-500">Derek</div>
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -313,8 +314,8 @@
                     <div class="status-indicator"></div>
                   </div>
                   <div>
-                    <div class="text-truncate">I have the photos that you ordered last month, how would you like them sent to you?</div>
-                    <div class="small text-gray-500">Jae Chun · 1d</div>
+                    <div class="text-truncate">Can you send over the report?</div>
+                    <div class="small text-gray-500">Aylesbury Clinic</div>
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -323,18 +324,8 @@
                     <div class="status-indicator bg-warning"></div>
                   </div>
                   <div>
-                    <div class="text-truncate">Last month's report looks great, I am very happy with the progress so far, keep up the good work!</div>
-                    <div class="small text-gray-500">Morgan Alvarez · 2d</div>
-                  </div>
-                </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                  <div class="dropdown-list-image mr-3">
-                    <img class="rounded-circle" src="https://source.unsplash.com/Mv9hjnEUHR4/60x60" alt="">
-                    <div class="status-indicator bg-success"></div>
-                  </div>
-                  <div>
-                    <div class="text-truncate">Am I a good boy? The reason I ask is because someone told me that people say this to all dogs, even if they aren't good...</div>
-                    <div class="small text-gray-500">Chicken the Dog · 2w</div>
+                    <div class="text-truncate">Don't charge next patient for consultation</div>
+                    <div class="small text-gray-500">Brian Kelleher</div>
                   </div>
                 </a>
                 <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
@@ -346,16 +337,31 @@
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Valerie Luna</span>
-                <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+                <span class="mr-2 d-none d-lg-inline btn btn-primary">Brian Kelleher</span>
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="#">
+                <a class="dropdown-item" href="
+                <?php
+                if (isset($_COOKIE['firstName'])){
+                  echo "userProfile.php";
+                } else {
+                  echo "hospitalUser.php";
+                }
+                ?>
+                ">
                   <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                   Profile
                 </a>
-                <a class="dropdown-item" href="#">
+                <a class="dropdown-item" href="
+                <?php
+                if (isset($_COOKIE['firstName'])){
+                  echo "userProfile.php";
+                } else {
+                  echo "hospitalUser.php";
+                }
+                ?>
+                ">
                   <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                   Settings
                 </a>
@@ -383,241 +389,106 @@
           <!-- majority of stuff happens here-->
           <div class="row">
               <div class="col">
-                <h1 class="display-4">Hospital Search</h1>
-                <form class="my-2 my-md-3 w-100 navbar-search">
+                <h1 class="display-5">Hospital Search</h1>
+                <form class="my-2 navbar-search" method="get" action="">
                   <div class="input-group">
-                    <input type="text" class="form-control border-secondary small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+                    <input type="text" class="form-control border-secondary small" name="search" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2" >
                     <div class="input-group-append">
-                      <button class="btn btn-primary" type="button">
+                      <button class="btn btn-primary" type="submit">
                         <i class="fas fa-search fa-sm"></i>
                       </button>
                     </div>
                   </div>
                 </form>
 
-
               <!-- first item -->
               <ul class="list-group list-group-flush">
-                <li class="list-group-item bg-light">
-              <div class="card shadow mb-3">
-                <div class="card-header my-0 py-1">
-                  <div class="d-flex row-flex justify-content-between my-0">
-                    <span class="p-2 float-left">
-                      <img src="img/neurospine.png" height="30px" class="rounded"/>
-                      </span>
-                    <span class="p-2 float-left my-auto">
-                      <a href="">
 
-                  <h4 class="card-title font-weight-bold mb-0">
-                    <button class="btn btn-outline-primary" role="button">
-                      Neurospine
-                  </button>
-                </h4>
-              </a>
-                  </span>
-                  <div class="p-2 float-right my-auto">
-                    <p class="card-text mb-0">
-                      Neurosurgery
-                </p>
-              </div>
-              </div>
-              </div>
-
-                <div class="card-body pt-3">
-                    <div class="d-flex row-flex justify-content-between">
-                      <p class="card-text">
-                        Neurospine offers physiotherapy, minimally invasive surgery, pain management and injections to aid with back pain.
-                        </p>
-                    </div>
-
-                    </div>
-              <div class="card-footer text-center">
-                <div class="row">
-                <div class="col text-center">
-                  <span class="mx-1">
-                Email
-              </span>
-                <button class="btn btn-outline-primary">
-                <i class="fas fa-envelope my-auto"></i>
-              </button>
-            </div>
-            <div class="col text-center">
-              <span class="mx-1">
-            Grant
-          </span>
-            <button class="btn btn-outline-primary">
-            <i class="fas fa-lock my-auto"></i>
-          </button>
-        </div>
-            <div class="col text-center">
-              <span class="mx-1">
-              Message
-            </span>
-                <button class="btn btn-outline-primary">
-                <i class="fas fa-paper-plane my-auto "></i>
-              </button>
-            </div>
-            <div class="col text-center">
-              <span class="mx-1">
-                Website
-                </span>
-                <button class="btn btn-outline-primary">
-                  <i class="fas fa-share-alt my-auto"></i>
-              </div>
-              </div>
-              </div>
-            </div>
-            </li>
-
-
-            <li class="list-group-item bg-light">
-            <div class="card shadow mb-3">
-              <div class="card-header my-0 py-1">
-                <div class="d-flex row-flex justify-content-between my-0">
-                  <span class="p-2 float-left">
-                    <img src="img/neurospine.png" height="30px" class="rounded"/>
+                <?php
+                foreach ($result as $row) {
+                  echo '<li class="list-group-item bg-light">
+                <div class="card shadow">
+                    <div class="d-flex row-flex justify-content-around my-0">
+                      <span class="p-2 float-left my-auto">
+                        <a href="">
+                    <h4 class="card-title mb-0">
+                        ' . $row['name'] . '
+                  </h4>
+                </a>
                     </span>
-                  <span class="p-2 float-left my-auto">
-                    <a href="">
-
-                <h4 class="card-title font-weight-bold mb-0">
-                  <button class="btn btn-outline-primary" role="button">
-                    Neurospine
-                </button>
-              </h4>
-            </a>
+                    <div class="p-2 float-right my-auto">
+                      <p class="card-text mb-0">
+                        Speciality: <span class="text-primary">' . $row['type'] . '</span>
+                  </p>
+                </div>
+                </div>
+                  <div class="card-body pt-3">
+                  <div class="row">
+                  <div class="col-6">
+                  <h6 class="card-subtitle text-muted">
+                  Description:
+                  </h6>
+                        <p class="card-text text-dark">
+                          ' . $row['description'] . '
+                          </p>
+                          </div>
+                          <div class="col-6">
+                          <h6 class="card-subtitle text-muted mb-1">
+                          Doctors:
+                          </h6>
+                          <ul class="list-group">';
+                            $doctorList = explode(",", $row['doctors']);
+                            $docCount = count($doctorList);
+                            $docCount = $docCount -1;
+                            for ($x = 0; $x < $docCount; $x++) {
+                              $d = $doctorList[$x];
+                              $d = str_replace('"', "", $d);
+                              echo '<li class="list-group-item py-1">
+                              <div class="d-flex justify-content-between">' . $d . '<a class="text-primary"><i class="fas fa-question"></i></a></div></li>';
+                            }
+                          echo '</ul>
+                          </div>
+                          </div>
+                      </div>
+                <div class="card-footer text-center">
+                  <div class="row">
+                  <div class="col text-center">
+                    <span class="mx-1">
+                  Page
                 </span>
-                <div class="p-2 float-right my-auto">
-                  <p class="card-text mb-0">
-                    Neurosurgery
-              </p>
-            </div>
-            </div>
-            </div>
-
-
-              <div class="card-body pt-3">
-                  <div class="d-flex row-flex justify-content-between">
-                    <p class="card-text">
-                      Neurospine offers physiotherapy, minimally invasive surgery, pain management and injections to aid with back pain.
-                      </p>
-                  </div>
-
-                  </div>
-            <div class="card-footer text-center">
-              <div class="row">
+                  <button class="btn btn-outline-primary">
+                  <i class="fas fa-home my-auto"></i>
+                </button>
+              </div>
               <div class="col text-center">
                 <span class="mx-1">
-              Email
+              Grant
             </span>
               <button class="btn btn-outline-primary">
-              <i class="fas fa-envelope my-auto"></i>
+              <i class="fas fa-lock my-auto"></i>
             </button>
           </div>
-          <div class="col text-center">
-            <span class="mx-1">
-          Grant
-        </span>
-          <button class="btn btn-outline-primary">
-          <i class="fas fa-lock my-auto"></i>
-        </button>
-      </div>
-          <div class="col text-center">
-            <span class="mx-1">
-            Message
-          </span>
-              <button class="btn btn-outline-primary">
-              <i class="fas fa-paper-plane my-auto "></i>
-            </button>
-          </div>
-          <div class="col text-center">
-            <span class="mx-1">
-              Website
+              <div class="col text-center">
+                <span class="mx-1">
+                Message
               </span>
-              <button class="btn btn-outline-primary">
-                <i class="fas fa-share-alt my-auto"></i>
-            </div>
-            </div>
-            </div>
-          </div>
-          </li>
-
-
-          <li class="list-group-item bg-light">
-          <div class="card shadow mb-3">
-            <div class="card-header my-0 py-1">
-              <div class="d-flex row-flex justify-content-between my-0">
-                <span class="p-2 float-left">
-                  <img src="img/neurospine.png" height="30px" class="rounded"/>
-                  </span>
-                <span class="p-2 float-left my-auto">
-                  <a href="">
-
-              <h4 class="card-title font-weight-bold mb-0">
-                <button class="btn btn-outline-primary" role="button">
-                  Neurospine
-              </button>
-            </h4>
-          </a>
-              </span>
-              <div class="p-2 float-right my-auto">
-                <p class="card-text mb-0">
-                  Neurosurgery
-            </p>
-          </div>
-          </div>
-          </div>
-
-
-            <div class="card-body pt-3">
-                <div class="d-flex row-flex justify-content-between">
-                  <p class="card-text">
-                    Neurospine offers physiotherapy, minimally invasive surgery, pain management and injections to aid with back pain.
-                    </p>
+              <a href="error.php">
+                  <button class="btn btn-outline-primary">
+                  <i class="fas fa-paper-plane my-auto "></i>
+                </button>
+                </a>
+              </div>
                 </div>
-
                 </div>
-          <div class="card-footer text-center">
-            <div class="row">
-            <div class="col text-center">
-              <span class="mx-1">
-            Email
-          </span>
-            <button class="btn btn-outline-primary">
-            <i class="fas fa-envelope my-auto"></i>
-          </button>
-        </div>
-        <div class="col text-center">
-          <span class="mx-1">
-        Grant
-      </span>
-        <button class="btn btn-outline-primary">
-        <i class="fas fa-lock my-auto"></i>
-      </button>
-    </div>
-        <div class="col text-center">
-          <span class="mx-1">
-          Message
-        </span>
-            <button class="btn btn-outline-primary">
-            <i class="fas fa-paper-plane my-auto "></i>
-          </button>
-        </div>
-        <div class="col text-center">
-          <span class="mx-1">
-            Website
-            </span>
-            <button class="btn btn-outline-primary">
-              <i class="fas fa-share-alt my-auto"></i>
-          </div>
-          </div>
-          </div>
-        </div>
-        </li>
+              </div>
+              </li>';
+                }
+                ?>
 
+      </ul>
           </div>
 
-                      <!-- left hand column-->
+                      <!-- left hand column
                       <div class="col-xl-4 col-lg-5 d-md-none d-lg-block">
                         <div class="sticky-text">
                         <div class="card mb-3 shadow">
@@ -659,7 +530,7 @@
                         </div>
                       </div>
                     </div>
-                      <!-- end left hand column -->
+                      end left hand column -->
           </div>
           <!-- Content Row -->
 
@@ -696,7 +567,9 @@
         <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
         <div class="modal-footer">
           <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-          <a class="btn btn-primary" href="login.html">Logout</a>
+          <form action="login.php" method="post">
+          <button value="logout" class="btn btn-primary">Logout</a>
+        </form>
         </div>
       </div>
     </div>
@@ -710,7 +583,7 @@
   <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
   <!-- Custom scripts for all pages-->
-  <script src="js/sb-admin-2.min.js"></script>
+  <script src="js/sb-admin-2.js"></script>
 
   <!-- Page level plugins -->
   <script src="vendor/chart.js/Chart.min.js"></script>

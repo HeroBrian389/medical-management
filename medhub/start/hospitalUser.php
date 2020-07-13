@@ -4,6 +4,11 @@ $username = "root";
 $password = "Mintylucky9";
 $dbname = "medhub";
 
+$emailCookie = $_COOKIE['hospitalEmail'];
+$dobCookie = $_COOKIE['dob'];
+$firstNameCookie = $_COOKIE['firstName'];
+$lastNameCookie = $_COOKIE['lastName'];
+
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 // Check connection
@@ -11,12 +16,112 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT * FROM `BRIAN_KELLEHER_REPORT_INFO`;";
+if (isset($_POST['biometrics'])) {
+  $weight = $_POST['weight'];
+  $height = $_POST['height'];
+  $bpm = $_POST['bpm'];
+  $blood_pressure = $_POST['blood_pressure'];
+
+  $sqlInsertBiometrics = "INSERT INTO `".$_COOKIE['email']."_STATIC_INFO` (weight, height, bpm, blood_pressure) VALUES ('". $weight."', '". $height . "', '" . $bpm . "', '" . $blood_pressure . "')";
+
+    if ($conn->query($sqlInsertBiometrics) === TRUE) {
+
+  } else {
+      echo "Error updating record: " . $conn->error;
+  }
+}
+
+if (isset($_POST['submit_basic'])) {
+  $practiceName = $_POST['name'];
+  $email = $_POST['email'];
+  $phone = $_POST['phone'];
+  $password = $_POST['passwordInput'];
+  $website = $_POST['website'];
+
+  $sqlInsertBasic = "INSERT INTO `".$emailCookie."_STATIC_INFO_HOSPITAL` (name, email, phone, password, website) VALUES ('". $practiceName . "', '" . $email . "', '" . $phone . "', '" . $password . "', '" . $website . "')";
+
+    if ($conn->query($sqlInsertBasic) === TRUE) {
+
+  } else {
+      echo "Error updating record: " . $conn->error;
+  }
+
+  if ($password != "") {
+    $sqlInsertPass = "UPDATE hospitalData SET password = '" . $password ."' WHERE email LIKE '" . $emailCookie . "';";
+    $conn->query($sqlInsertPass);
+  }
+}
+
+if (isset($_POST['submit_description'])) {
+  $description = $_POST['description'];
+  $locationInfo = $_POST['location'];
+  $type = $_POST['type'];
+
+  $accessString = '';
+
+  $access = $_POST['tagAccess'];
+
+  $accessList = explode(",",$access);
+  foreach ($accessList as $list) {
+    $a = explode('"', $list);
+    $name = $a[3];
+    $str = '"' . $name . '",';
+    $accessString .= $str;
+  }
+
+  $sqlInsertAddress = "INSERT INTO `".$emailCookie."_STATIC_INFO_HOSPITAL` (description, location, type, doctors) VALUES ('" . $description . "', '" . $locationInfo . "', '" . $type . "', '" . $accessString . "')";
+
+    if ($conn->query($sqlInsertAddress) === TRUE) {
+
+  } else {
+      echo "Error updating record: " . $conn->error;
+  }
+}
+
+
+$sql = "SELECT * FROM `" . $emailCookie . "_STATIC_INFO_HOSPITAL`;";
+
 $result = $conn->query($sql);
 
-$conn->close();
-?>
+$sql = "SELECT * FROM userData;";
+$tagList = $conn->query($sql);
 
+foreach ($result as $row) {
+  if (gettype($row['name']) != "NULL") {
+    $practiceNameRow = $row['name'];
+  }
+  if (gettype($row['email']) != "NULL") {
+    $emailRow = $row['email'];
+  }
+  if (gettype($row['phone']) != "NULL") {
+    $phoneRow = $row['phone'];
+  }
+  if (gettype($row['description']) != "NULL") {
+    $descriptionRow = $row['description'];
+  }
+  if (gettype($row['location']) != "NULL") {
+    $locationRow = $row['location'];
+  }
+  if (gettype($row['type']) != "NULL") {
+    $typeRow = $row['type'];
+  }
+  if (gettype($row['website']) != "NULL") {
+    $websiteRow = $row['website'];
+  }
+  if (gettype($row['password']) != "NULL") {
+    $passwordRow = $row['password'];
+  }
+  if (gettype($row['doctors']) != "NULL") {
+    $doctorsRow = $row['doctors'];
+  }
+}
+
+$sqlInsert = "UPDATE hospitalData SET name = '" . $practiceNameRow . "',  email = '" . $emailRow . "', type = '" . $typeRow ."', location = '" . $locationRow . "', phone = '" . $phoneRow . "', description = '" . $descriptionRow . "', doctors ='" . $doctorsRow . "' WHERE email LIKE '" . $emailCookie . "';";
+$conn->query($sqlInsert);
+
+$sql = "SELECT * FROM physicians";
+$physicianResults = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -28,7 +133,7 @@ $conn->close();
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SB Admin 2 - Dashboard</title>
+  <title>Medhub</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -37,13 +142,47 @@ $conn->close();
   <!-- Custom styles for this template-->
   <link href="css/sb-admin-2.css" rel="stylesheet">
 
+
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+   <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+
   <style>
   .embed-responsive-210by297 {
+  padding-bottom: 160.42%;
   overflow: hidden;
   width:100%;
 }
 .scroll-div {
   overflow: scroll;
+}
+
+.customSuggestionsList > div{
+  max-height: 200px;
+  border: 2px solid pink;
+  overflow: auto;
+  font-size: 14px;
+}
+
+.tags-look .tagify__dropdown__item{
+  display: inline-block;
+  border-radius: 3px;
+  padding: .3em .5em;
+  border: 1px solid #CCC;
+  background: #F3F3F3;
+  margin: .2em;
+  font-size: .85em;
+  color: black;
+  transition: 0s;
+}
+
+.tags-look .tagify__dropdown__item--active{
+  color: black;
+}
+
+.tags-look .tagify__dropdown__item:hover{
+  background: lightyellow;
+  border-color: gold;
 }
 </style>
 
@@ -60,18 +199,18 @@ $conn->close();
       <!-- Sidebar - Brand -->
       <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
         <div class="sidebar-brand-icon rotate-n-15">
-          <i class="fas fa-laugh-wink"></i>
+          <i class="fas fa-list"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+        <div class="sidebar-brand-text mx-3">Medhub</div>
       </a>
 
       <!-- Divider -->
       <hr class="sidebar-divider my-0">
 
       <!-- Nav Item - Dashboard -->
-      <li class="nav-item active">
+      <li class="nav-item">
         <a class="nav-link" href="index.html">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <i class="fas fa-fw fa-home"></i>
           <span>Dashboard</span></a>
       </li>
 
@@ -80,20 +219,21 @@ $conn->close();
 
       <!-- Heading -->
       <div class="sidebar-heading">
-        Interface
+        Your info
       </div>
 
       <!-- Nav Item - Pages Collapse Menu -->
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
           <i class="fas fa-fw fa-cog"></i>
-          <span>Components</span>
+          <span>Profile</span>
         </a>
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Custom Components:</h6>
-            <a class="collapse-item" href="buttons.html">Buttons</a>
-            <a class="collapse-item" href="cards.html">Cards</a>
+            <h6 class="collapse-header">Profile:</h6>
+            <a class="collapse-item" href="">Medical history</a>
+            <a class="collapse-item" href="">Social history</a>
+            <a class="collapse-item" href="">Past procedures</a>
           </div>
         </div>
       </li>
@@ -101,16 +241,15 @@ $conn->close();
       <!-- Nav Item - Utilities Collapse Menu -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
-          <i class="fas fa-fw fa-wrench"></i>
-          <span>Utilities</span>
+          <i class="fas fa-fw fa-clipboard"></i>
+          <span>Reports</span>
         </a>
         <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Custom Utilities:</h6>
-            <a class="collapse-item" href="utilities-color.html">Colors</a>
-            <a class="collapse-item" href="utilities-border.html">Borders</a>
-            <a class="collapse-item" href="utilities-animation.html">Animations</a>
-            <a class="collapse-item" href="utilities-other.html">Other</a>
+            <h6 class="collapse-header">Reports:</h6>
+            <a class="collapse-item" href="reportUser.php">Your reports</a>
+            <a class="collapse-item" href="scan.php">Upload reports</a>
+            <a class="collapse-item" href="hospitalUser.php">Tagged reports</a>
           </div>
         </div>
       </li>
@@ -120,41 +259,30 @@ $conn->close();
 
       <!-- Heading -->
       <div class="sidebar-heading">
-        Addons
+        Hospitals
       </div>
 
       <!-- Nav Item - Pages Collapse Menu -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-          <i class="fas fa-fw fa-folder"></i>
-          <span>Pages</span>
+          <i class="fas fa-fw fa-list-ul"></i>
+          <span>Manage</span>
         </a>
         <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Login Screens:</h6>
-            <a class="collapse-item" href="login.html">Login</a>
-            <a class="collapse-item" href="register.html">Register</a>
-            <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
-            <div class="collapse-divider"></div>
-            <h6 class="collapse-header">Other Pages:</h6>
-            <a class="collapse-item" href="404.html">404 Page</a>
-            <a class="collapse-item" href="blank.html">Blank Page</a>
+            <h6 class="collapse-header">Manage hospitals:</h6>
+            <a class="collapse-item" href="hospital.php">Add hospitals</a>
+            <a class="collapse-item" href="hospital.php">Remove hospitals</a>
+            <a class="collapse-item" href="hospitalUser.php">Edit permissions</a>
           </div>
         </div>
       </li>
 
       <!-- Nav Item - Charts -->
       <li class="nav-item">
-        <a class="nav-link" href="charts.html">
-          <i class="fas fa-fw fa-chart-area"></i>
-          <span>Charts</span></a>
-      </li>
-
-      <!-- Nav Item - Tables -->
-      <li class="nav-item">
-        <a class="nav-link" href="tables.html">
-          <i class="fas fa-fw fa-table"></i>
-          <span>Tables</span></a>
+        <a class="nav-link" href="">
+          <i class="fas fa-fw fa-eye"></i>
+          <span>View hospitals</span></a>
       </li>
 
       <!-- Divider -->
@@ -178,7 +306,7 @@ $conn->close();
         <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
           <!-- Sidebar Toggle (Topbar) -->
-          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+          <button id="sidebarToggleTop" class="btn btn-link d-lg-none rounded-circle mr-3">
             <i class="fa fa-bars"></i>
           </button>
 
@@ -219,8 +347,8 @@ $conn->close();
 
 
             <li class="nav-item my-auto mx-3 text-center">
-              <a href="">
-                <p class="text-primary my-auto">
+              <a href="dashboard.php">
+                <p class="text-muted my-auto">
                 <i class="fas fa-home fa-fw mx-1 mx-auto"></i>
                 <span class="mx-2 hide-nav-home small">Home</span>
               </p>
@@ -255,7 +383,7 @@ $conn->close();
             </li>
 
             <!-- Nav Item - Alerts -->
-            <li class="nav-item dropdown no-arrow mx-1">
+            <li class="nav-item dropdown no-arrow mx-1 text-muted">
               <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>
                 <!-- Counter - Alerts -->
@@ -273,8 +401,8 @@ $conn->close();
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 12, 2019</div>
-                    <span class="font-weight-bold">A new monthly report is ready to download!</span>
+                    <div class="small text-gray-500">8/7/20</div>
+                    Brian Kelleher uploaded a report
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -284,8 +412,8 @@ $conn->close();
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 7, 2019</div>
-                    $290.29 has been deposited into your account!
+                    <div class="small text-gray-500">6/7/20</div>
+                    Aylesbury clinic tagged you in a report
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -295,8 +423,8 @@ $conn->close();
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 2, 2019</div>
-                    Spending Alert: We've noticed unusually high spending for your account.
+                    <div class="small text-gray-500">5/7/20</div>
+                    Invoice outstanding for 30 days for patient <span class="font-weight-bold text-primary">Derek</span> for €290
                   </div>
                 </a>
                 <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
@@ -320,9 +448,9 @@ $conn->close();
                     <img class="rounded-circle" src="https://source.unsplash.com/fn_BT9fwg_E/60x60" alt="">
                     <div class="status-indicator bg-success"></div>
                   </div>
-                  <div class="font-weight-bold">
-                    <div class="text-truncate">Hi there! I am wondering if you can help me with a problem I've been having.</div>
-                    <div class="small text-gray-500">Emily Fowler · 58m</div>
+                  <div class="">
+                    <div class="text-truncate">Hi, I have a question about my appointment with Dr. Kelleher.</div>
+                    <div class="small text-gray-500">Derek</div>
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -331,8 +459,8 @@ $conn->close();
                     <div class="status-indicator"></div>
                   </div>
                   <div>
-                    <div class="text-truncate">I have the photos that you ordered last month, how would you like them sent to you?</div>
-                    <div class="small text-gray-500">Jae Chun · 1d</div>
+                    <div class="text-truncate">Can you send over the report?</div>
+                    <div class="small text-gray-500">Aylesbury Clinic</div>
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -341,18 +469,8 @@ $conn->close();
                     <div class="status-indicator bg-warning"></div>
                   </div>
                   <div>
-                    <div class="text-truncate">Last month's report looks great, I am very happy with the progress so far, keep up the good work!</div>
-                    <div class="small text-gray-500">Morgan Alvarez · 2d</div>
-                  </div>
-                </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                  <div class="dropdown-list-image mr-3">
-                    <img class="rounded-circle" src="https://source.unsplash.com/Mv9hjnEUHR4/60x60" alt="">
-                    <div class="status-indicator bg-success"></div>
-                  </div>
-                  <div>
-                    <div class="text-truncate">Am I a good boy? The reason I ask is because someone told me that people say this to all dogs, even if they aren't good...</div>
-                    <div class="small text-gray-500">Chicken the Dog · 2w</div>
+                    <div class="text-truncate">Don't charge next patient for consultation</div>
+                    <div class="small text-gray-500">Brian Kelleher</div>
                   </div>
                 </a>
                 <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
@@ -364,8 +482,7 @@ $conn->close();
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Valerie Luna</span>
-                <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+                <span class="mr-2 d-none d-lg-inline btn btn-primary"><?php echo $firstNameRow . ' ' . $lastNameRow;  ?></span>
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
@@ -396,257 +513,143 @@ $conn->close();
 
         <!-- Begin Page Content -->
         <div class="container-fluid">
-          <div class="profile-page tx-13">
-            <div class="profile-header">
-                <div class="header-links">
-                    <ul class="links d-flex justify-content-around mt-3">
-                        <li class="header-link-item d-flex active">
-                            <h5 class="font-weight-bold my-auto">Your Neurospine Files...</h5>
-                        </li>
-                        <li class="header-link-item border-left border-secondary pl-3 d-flex align-items-center">
-                        </li>
-                        <li class="header-link-item ml-3 pl-3 d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user mr-1 icon-md">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            <a class="pt-1px d-none d-md-block" href="#">About</a>
-                        </li>
-                        <li class="header-link-item border-left border-secondary pl-3 d-flex align-items-center">
-                        </li>
-                        <li class="header-link-item ml-3 pl-3 d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users mr-1 icon-md">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                            <a class="pt-1px d-none d-md-block" href="#">Friends <span class="text-muted tx-12">3,765</span></a>
-                        </li>
-                        <li class="header-link-item border-left border-secondary pl-3 d-flex align-items-center">
-                        </li>
-                        <li class="header-link-item ml-3 pl-3 d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-image mr-1 icon-md">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                <polyline points="21 15 16 10 5 21"></polyline>
-                            </svg>
-                            <a class="pt-1px d-none d-md-block" href="#">Photos</a>
-                        </li>
-                        <li class="header-link-item border-left border-secondary pl-3 d-flex align-items-center">
-                        </li>
-                        <li class="header-link-item ml-3 pl-3  d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-video mr-1 icon-md">
-                                <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                            </svg>
-                            <a class="pt-1px d-none d-md-block" href="#">Videos</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-    <div class="row profile-body">
-        <!-- left wrapper start -->
-
-        <!-- left wrapper end -->
-        <!-- middle wrapper start -->
-        <div class="col middle-wrapper">
-
-            <?php
-            foreach ($result as $row) {
-              echo '<div class="row">
-              <div class="col">
-                <div class="card shadow mb-3">
-                  <div class="card-header py-1">
-                    <div class="d-flex row-flex justify-content-between my-0">
-                      <span class="p-2 float-left my-auto">
-                        <a href="">
-                    <h4 class="card-title font-weight-bold my-auto">
-                      <button class="btn btn-outline-primary" role="button">';
-                      echo $row['uploadHospital'];
-                      echo '</button>
-                    </h4>
-                  </a>
-                      </span>
-                      <div class="p-2 float-right my-auto extra-detail-div">
-                        <p class="card-text mb-0">';
-                        echo $row['uploadUser'];
-                        echo '</p>
-                  </div>
-
-                  <div class="p-2 my-auto extra-detail-button no-arrow" style="display: none">
-                    <button class="text-primary btn" href="#" id="searchDropdown1" role="button" onclick="myFunction3()">
-                      <i class="fas fa-caret-down"></i>
-                    </button>
-                  </div>
-                  </div>
-                    <!-- Dropdown - Messages -->
-                    <div style="display:none" id="moreInfo" class="text-right">
-                      <div class="my-auto">
-                        <p class="card-text mb-0">';
-                        echo $row['uploadUser'];
-                        echo '</p>
-                    <p class="card-text mb-0">';
-                    echo $row['uploadTime'];
-                    echo '</p>
-                  </div>
-                    </div>
-                  </div>
-                    <div class="card-body pt-3">
-                        <div class="d-flex row-flex justify-content-between">
-                          <table class="table table-bordered">
-                            <tbody>
-                              <tr>
-                                <td class="bg-light text-center my-auto font-weight-bold">';
-                                if ($row['type'] =="MRI") {
-                                  $color = "warning";
-                                } else {
-                                  $color = "success";
-                                }
-                                  echo '<i class="fas fa-circle text-' . $color . ' mr-2"></i>';
-                                  echo $row['type'];
-                                  echo '</td>
-                                    <td class="text-center my-auto">';
-                                    echo $row['title'];
-                                    echo '</td>
-                                      <td class="text-center my-auto">';
-                                      echo $row['date'];
-                                      echo '</td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                                </div>
-                                <div class="d-flex justify-content-around mb-3">
-                                  <button class="btn btn-outline-primary">
-                                    Send
-                                  <i class="fas fa-envelope ml-1"></i>
-                                </button>
-                                      <button class="btn btn-outline-primary">
-                                        Message
-                                      <i class="fas fa-paper-plane ml-1"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#expandPDF">Show PDF
-                                    <i class="fas fa-expand ml-1"></i></button>
-                                <button class="btn btn-sm btn-outline-primary">Download PDF<i class="fas fa-download fa-fw mx-1"></i>
-                              </div>
-                          <div class="card-footer text-center">';
-                          echo $row['uploadDate'] . ' - ' . $row['uploadTime'];
-                          echo '</div>
-                          </div>
-                        </div>
-                      </div>
-                      </div>';
-            }
-            ?>
-
-
-
-            </div>
-            <div class="d-none d-md-block col-md-4 col-xl-3 left-wrapper">
-                <div class="card rounded">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h6 class="card-title mb-0 font-weight-bold text-uppercase">About:</h6>
-                            <div class="dropdown">
-                                <button class="btn p-0" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal icon-lg text-muted pb-3px">
-                                        <circle cx="12" cy="12" r="1"></circle>
-                                        <circle cx="19" cy="12" r="1"></circle>
-                                        <circle cx="5" cy="12" r="1"></circle>
-                                    </svg>
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item d-flex align-items-center" href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 icon-sm mr-2">
-                                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                                        </svg> <span class="">Edit</span></a>
-                                    <a class="dropdown-item d-flex align-items-center" href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-git-branch icon-sm mr-2">
-                                            <line x1="6" y1="3" x2="6" y2="15"></line>
-                                            <circle cx="18" cy="6" r="3"></circle>
-                                            <circle cx="6" cy="18" r="3"></circle>
-                                            <path d="M18 9a9 9 0 0 1-9 9"></path>
-                                        </svg> <span class="">Update</span></a>
-                                    <a class="dropdown-item d-flex align-items-center" href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye icon-sm mr-2">
-                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                            <circle cx="12" cy="12" r="3"></circle>
-                                        </svg> <span class="">View all</span></a>
-                                </div>
-                            </div>
-                        </div>
-                        <p>Neurospine specialises in physiotherapy, pain management, injections and minimally invasive surgery.</p>
-                        <div class="mt-3">
-                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">Speciality:</label>
-                            <p class="text-muted">Neurosurgery</p>
-                        </div>
-                        <div class="mt-3">
-                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">Location:</label>
-                            <p class="text-muted">Suite 10, Sports Surgery CLinic, Santry</p>
-                        </div>
-                        <div class="mt-3">
-                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">Email:</label>
-                            <p class="text-muted">info@neurospine.ie</p>
-                        </div>
-                        <div class="mt-3">
-                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">Website:</label>
-                            <p class="text-muted">www.neurospine.ie</p>
-                        </div>
-
-                        <div class="mt-3">
-                            <label class="tx-11 font-weight-bold mb-0 text-uppercase">Phone</label>
-                            <p class="text-muted">+353 01 2142 124</p>
-                        </div>
-                        <div class="mt-3 row">
-                          <div class="col-lg-12 col-xs mb-3">
-                          <button class="btn btn-outline-primary">
-                            Message Us
-                          <i class="far fa-paper-plane ml-1"></i>
-                        </button>
-                      </div>
-                      <div class="col-xs col-lg-12">
-                        <button class="btn btn-outline-primary">
-                          Make an appointment
-                          <i class="far fa-calendar-check ml-1"></i>
-                        </button>
-                      </div>
-                        </div>
+          
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 col-12 mb-3">
+          <!-- majority of stuff happens here-->
+          <div class="row">
+            <!-- center column -->
+            <div class="col">
+              <!-- first item -->
+            <div class="card shadow mb-3">
+              <div class="card-header d-flex justify-content-between">
+                <h5 class="card-title font-weight-bold mb-0 my-auto">Basic Info</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
+              <form class="row" method="post" action="">
+                <div class="col-6">
+                    <div class="form-group">
+                        <label for="account-fn">Practice Name</label>
+                        <?php echo '<input class="form-control" type="text" id="account-fn" name="name" value="' . $practiceNameRow .'">';?>
                     </div>
                 </div>
+                <div class="col-6">
+                    <div class="form-group">
+                        <label for="account-fn">Website</label>
+                        <?php echo '<input class="form-control" type="text" id="account-fn" name="website" value="' . $websiteRow .'">';?>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="account-email">E-mail Address</label>
+                        <?php echo '<input class="form-control" type="email" id="account-email" name="email" value="' . $emailRow .'">';?>
+
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="account-phone">Phone Number</label>
+                        <?php echo '<input class="form-control" type="text" id="account-phone" name="phone" value="' . $phoneRow .'">';?>
+
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="account-pass">New Password</label>
+                        <?php echo '<input class="form-control" type="password" id="account-pass" name="passwordInput">';?>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="account-confirm-pass">Confirm Password</label>
+                        <input class="form-control" type="password" id="account-confirm-pass">
+                    </div>
+                </div>
+                <div class="col-12">
+                    <hr class="mt-2 mb-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center">
+                        <button class="btn btn-style-1 btn-primary" name="submit_basic" type="submit" data-toast-position="topRight" data-toast-type="success" data-toast-icon="fe-icon-check-circle" data-toast-title="Success!" data-toast-message="Your profile updated successfuly.">Update Profile</button>
+                    </div>
+                </div>
+            </form>
+          </div>
+        </div>
+
+          </div>
+          <!-- Content Row -->
+          <!-- Content Row -->
+        </div>
+
+        <div class="card shadow mb-3">
+          <div class="card-header d-flex justify-content-between">
+            <h5 class="card-title font-weight-bold mb-0 my-auto">Description Info</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
+          <form class="row" method="post" action="">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="account-fn">Description</label>
+                    <textarea name="description" class="form-control" rows="4"><?php echo $descriptionRow ?></textarea>
+                </div>
             </div>
-        </div>
-        <!-- middle wrapper end -->
-        <!-- right wrapper start -->
-        </div>
-        <!-- right wrapper end -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="account-ln">Location</label>
+                    <?php echo '<input class="form-control" type="text" id="account-ln" name="location" value="' . $locationRow .'">';?>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="inlineFormCustomSelectPref">Type</label>
+                    <?php echo '<input class="form-control" type="text" id="account-ln" name="type" value="' . $typeRow .'">';?>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="tagInputBasic">Medical professionals</label>
+                    <input name='tagAccess' id="tagInputBasic" placeholder="Type your own or choose from suggested">
+                </div>
+            </div>
+
+            <div class="col-12">
+                <hr class="mt-2 mb-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <button class="btn btn-style-1 btn-primary" name="submit_description" type="submit" data-toast="" data-toast-position="topRight" data-toast-type="success" data-toast-icon="fe-icon-check-circle" data-toast-title="Success!" data-toast-message="Your profile updated successfuly.">Update Profile</button>
+                </div>
+            </div>
+        </form>
+      </div>
+
+      </div>
     </div>
-</div>
-</div>
-
-          <!-- Content Row -->
-
-
-          <!-- Content Row -->
-
-        </div>
+      </div>
+      <!-- Content Row -->
+      <!-- Content Row -->
+    </div>
         <!-- /.container-fluid -->
+
+</div>
 
       </div>
       <!-- End of Main Content -->
 
     </div>
     <!-- End of Content Wrapper -->
+</div>
 
-  </div>
+</div>
+</div>
+
   <!-- End of Page Wrapper -->
 
   <!-- Scroll to Top Button-->
   <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
   </a>
-
 
   <!-- Logout Modal-->
   <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -667,31 +670,8 @@ $conn->close();
     </div>
   </div>
 
-
-    <div class="modal" id="expandPDF" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">PDF</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="embed-responsive embed-responsive-210by297" style="height: 80vh">
-              <iframe class="embed-responsive-item" src="assets/Thomas Mcgurk.pdf#toolbar=0&zoom=Scale&navpanes=0" height="90%"></iframe>
-            </div>
-          </div>
-          <div class="modal-footer">
-                <p class="card-text float-left">Thomas McGurk</p>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Share</button>
-          </div>
-          </div>
-        </div>
-      </div>
-
   <!-- Bootstrap core JavaScript-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
   <script src="vendor/jquery/jquery.min.js"></script>
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
@@ -709,33 +689,192 @@ $conn->close();
   <script src="js/demo/chart-pie-demo.js"></script>
 
   <script>
-  function myFunction() {
-  var x = document.getElementById("pdfDiv");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
+  var input = document.getElementById('tagInputBasic'),
+    // init Tagify script on the above inputs
+    tagify = new Tagify(input, {
+      whitelist: [
+        <?php
+        foreach ($physicianResults as $row) {
+          echo '"' . $row['name'] . '",';
+        }
+        ?>
+      ],
+      maxTags: 10,
+      dropdown: {
+        maxItems: 20,           // <- mixumum allowed rendered suggestions
+        classname: "tags-look", // <- custom classname for this dropdown, so it could be targeted
+        enabled: 0,             // <- show suggestions on focus
+        closeOnSelect: false    // <- do not hide the suggestions dropdown once an item has been selected
+      }
+    })
+
+    tagify.addTags([
+      <?php
+      echo $doctorsRow;
+      ?>
+    ])
+
+
+  var chartColors = {
+  red: 'rgb(255, 99, 132)',
+  orange: 'rgb(255, 159, 64)',
+  yellow: 'rgb(255, 205, 86)',
+  green: 'rgb(75, 192, 192)',
+  blue: 'rgb(54, 162, 235)',
+  purple: 'rgb(153, 102, 255)',
+  grey: 'rgb(231,233,237)',
+  white: 'rgb(255, 255, 255, 255)',
+};
+
+new Chart(document.getElementById("line-chart"), {
+  type: 'line',
+  data: {
+    labels: ["8 AM","12 PM","4 PM","8 PM"],
+    datasets: [
+      {
+        data: [450,0,500,350],
+        label: "Lower",
+        borderColor: chartColors.orange,
+        fill: false,
+      },
+    ]
+  },
+  options: {
+    legend: {
+      display: false,
+    },
+    scales: {
+        xAxes: [{
+            gridLines: {
+                display:false
+            }
+        }],
+        yAxes: [{
+            gridLines: {
+                display:false
+            },
+            ticks: {
+              beginAtZero: true,
+            }
+        }]
+    }
+
+}});
+
+new Chart(document.getElementById("line-chart1"), {
+  type: 'line',
+  data: {
+    labels: ["Jan", "Feb", "Mar", "April"],
+    datasets: [
+      {
+        data: [60,90,70,80],
+        label: "Lower",
+        borderColor: chartColors.yellow,
+        fill: true,
+        backgroundColor: chartColors.white,
+      },
+      {
+        data: [86,114,106,110],
+        label: "Upper",
+        borderColor: chartColors.red,
+        fill: true,
+        backgroundColor: chartColors.orange,
+
+      },
+      {
+      },
+    ]
+  },
+  options: {
+    legend: {
+      display: false,
+    },
+    scales: {
+        xAxes: [{
+            gridLines: {
+                display:false
+            }
+        }],
+        yAxes: [{
+            gridLines: {
+                display:false
+            }
+        }]
+    }
   }
-}
+});
 
-function myFunction1() {
-var x = document.getElementById("pdfDiv1");
-if (x.style.display === "none") {
-  x.style.display = "block";
-} else {
-  x.style.display = "none";
-}
-}
 
-function myFunction3() {
-var x = document.getElementById("moreInfo");
-if (x.style.display === "none") {
-  x.style.display = "block";
-} else {
-  x.style.display = "none";
-}
-}
+new Chart(document.getElementById("line-chart2"), {
+  type: 'line',
+  data: {
+    labels: ["Jan", "Mar", "Jun", "Sep"],
+    datasets: [
+      {
+        data: [38,23,44,42],
+        label: "Lower",
+        borderColor: chartColors.orange,
+        fill: false,
+      },
+    ]
+  },
+  options: {
+    legend: {
+      display: false,
+    },
+    scales: {
+        xAxes: [{
+            gridLines: {
+                display:false
+            }
+        }],
+        yAxes: [{
+            gridLines: {
+                display:false
+            },
+            ticks: {
+              beginAtZero: true,
+            }
+        }]
+    }
+
+}});
+
+new Chart(document.getElementById("line-chart3"), {
+  type: 'line',
+  data: {
+    labels: ["Jan", "Mar", "Jun", "Sep"],
+    datasets: [
+      {
+        data: [19,23,6,42],
+        label: "Lower",
+        borderColor: chartColors.orange,
+        fill: false,
+      },
+    ]
+  },
+  options: {
+    legend: {
+      display: false,
+    },
+    scales: {
+        xAxes: [{
+            gridLines: {
+                display:false
+            }
+        }],
+        yAxes: [{
+            gridLines: {
+                display:false
+            },
+            ticks: {
+              beginAtZero: true,
+            }
+        }]
+    }
+}});
 </script>
+
 </body>
 
 </html>

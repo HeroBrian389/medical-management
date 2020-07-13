@@ -1,14 +1,176 @@
 <?php
-$firstName = $_POST['firstName'];
-$lastName = $_POST['lastName'];
-$dob = $_POST['dob'];
-$email = $_POST['email'];
-$phone = $_POST['phone'];
-$address1 = $_POST['address1'];
-$address2 = $_POST['address2'];
-$county = $_POST['county'];
-$gp = $_POST['gp'];
-$refer = $_POST['refer'];
+$servername = "localhost";
+$username = "root";
+$password = "Mintylucky9";
+$dbname = "medhub";
+
+
+$emailCookie = $_COOKIE['email'];
+$dobCookie = $_COOKIE['dob'];
+$firstNameCookie = $_COOKIE['firstName'];
+$lastNameCookie = $_COOKIE['lastName'];
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+if (isset($_POST['biometrics'])) {
+  $weight = $_POST['weight'];
+  $height = $_POST['height'];
+  $bpm = $_POST['bpm'];
+  $blood_pressure = $_POST['blood_pressure'];
+
+  $sqlInsertBiometrics = "INSERT INTO `".$_COOKIE['email']."_STATIC_INFO` (weight, height, bpm, blood_pressure) VALUES ('". $weight."', '". $height . "', '" . $bpm . "', '" . $blood_pressure . "')";
+
+    if ($conn->query($sqlInsertBiometrics) === TRUE) {
+
+  } else {
+      echo "Error updating record: " . $conn->error;
+  }
+}
+
+if (isset($_POST['submit_basic'])) {
+  $firstName = $_POST['firstName'];
+  $lastName = $_POST['lastName'];
+  $email = $_POST['email'];
+  $phone = $_POST['phone'];
+  $password = $_POST['password'];
+
+  $accessString = '';
+
+  $access = $_POST['tagAccess'];
+  $accessList = explode(",",$access);
+  foreach ($accessList as $list) {
+    $a = explode('"', $list);
+    $name = $a[3];
+    $str = '"' . $name . '",';
+    $accessString .= $str;
+  }
+
+  $sqlInsertBasic = "INSERT INTO `".$_COOKIE['email']."_STATIC_INFO` (firstName, lastName, email, phone, password, basic_access) VALUES ('". $firstName."', '". $lastName . "', '" . $email . "', '" . $phone . "', '" . $password . "', '" . $accessString . "')";
+
+    if ($conn->query($sqlInsertBasic) === TRUE) {
+
+  } else {
+      echo "Error updating record: " . $conn->error;
+  }
+}
+
+if (isset($_POST['submit_address'])) {
+  $address1 = $_POST['address1'];
+  $address2 = $_POST['address2'];
+  $county = $_POST['county'];
+
+  $accessString = '';
+
+  $access = $_POST['tagAccessAddress'];
+  $accessList = explode(",",$access);
+  foreach ($accessList as $list) {
+    $a = explode('"', $list);
+    $name = $a[3];
+    $str = '"' . $name . '",';
+    $accessString .= $str;
+  }
+
+  $sqlInsertAddress = "INSERT INTO `".$_COOKIE['email']."_STATIC_INFO` (address1, address2, county, address_access) VALUES ('". $address1."', '". $address2 . "', '" . $county . "', '" . $accessString . "')";
+
+    if ($conn->query($sqlInsertAddress) === TRUE) {
+
+  } else {
+      echo "Error updating record: " . $conn->error;
+  }
+}
+
+if (isset($_POST['submit_doctor'])) {
+  $gp = $_POST['gp'];
+  $refer = $_POST['refer'];
+
+  $accessString = '';
+
+  $access = $_POST['tagAccess'];
+  $accessList = explode(",",$access);
+  foreach ($accessList as $list) {
+    $a = explode('"', $list);
+    $name = $a[3];
+    $str = '"' . $name . '",';
+    $accessString .= $str;
+  }
+
+  $sqlInsertDoctor = "INSERT INTO `".$_COOKIE['email']."_STATIC_INFO` (GP, refer,doctor_access) VALUES ('". $gp."', '". $refer . "', '" . $accessString . "')";
+
+    if ($conn->query($sqlInsertDoctor) === TRUE) {
+
+  } else {
+      echo "Error updating record: " . $conn->error;
+  }
+}
+
+$sql = "SELECT * FROM `" . $_COOKIE['email'] . "_STATIC_INFO`;";
+
+$result = $conn->query($sql);
+
+$sql = "SELECT * FROM hospitalData;";
+$tagList = $conn->query($sql);
+
+foreach ($result as $row) {
+  if (gettype($row['weight']) != "NULL") {
+    $weightRow = $row['weight'];
+  }
+  if (gettype($row['height']) != "NULL") {
+    $heightRow = $row['height'];
+  }
+  if (gettype($row['bpm']) != "NULL") {
+    $bpmRow = $row['bpm'];
+  }
+  if (gettype($row['blood_pressure']) != "NULL") {
+    $blood_pressureRow = $row['blood_pressure'];
+  }
+  if (gettype($row['firstName']) != "NULL") {
+    $firstNameRow = $row['firstName'];
+  }
+  if (gettype($row['lastName']) != "NULL") {
+    $lastNameRow = $row['lastName'];
+  }
+  if (gettype($row['email']) != "NULL") {
+    $emailRow = $row['email'];
+  }
+  if (gettype($row['phone']) != "NULL") {
+    $phoneRow = $row['phone'];
+  }
+  if (gettype($row['password']) != "NULL") {
+    $passwordRow = $row['password'];
+  }
+  if (gettype($row['address1']) != "NULL") {
+    $address1Row = $row['address1'];
+  }
+  if (gettype($row['address2']) != "NULL") {
+    $address2Row = $row['address2'];
+  }
+  if (gettype($row['county']) != "NULL") {
+    $countyRow = $row['county'];
+  }
+  if (gettype($row['GP']) != "NULL") {
+    $gpRow = $row['GP'];
+  }
+  if (gettype($row['refer']) != "NULL") {
+    $referRow = $row['refer'];
+  }
+  if (gettype($row['basic_access']) != "NULL") {
+    $basic_accessRow = $row['basic_access'];
+  }
+  if (gettype($row['address_access']) != "NULL") {
+    $address_accessRow = $row['address_access'];
+  }
+  if (gettype($row['doctor_access']) != "NULL") {
+    $doctor_accessRow = $row['doctor_access'];
+  }
+  if (gettype($row['info_access']) != "NULL") {
+    $blood_accessRow = $row['info_access'];
+  }
+}
 
 ?>
 <!DOCTYPE html>
@@ -22,7 +184,7 @@ $refer = $_POST['refer'];
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SB Admin 2 - Dashboard</title>
+  <title>Medhub</title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -30,6 +192,11 @@ $refer = $_POST['refer'];
 
   <!-- Custom styles for this template-->
   <link href="css/sb-admin-2.css" rel="stylesheet">
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+   <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
 
   <style>
   .embed-responsive-210by297 {
@@ -39,6 +206,13 @@ $refer = $_POST['refer'];
 }
 .scroll-div {
   overflow: scroll;
+}
+
+.customSuggestionsList > div{
+  max-height: 200px;
+  border: 2px solid pink;
+  overflow: auto;
+  font-size: 14px;
 }
 </style>
 
@@ -55,18 +229,18 @@ $refer = $_POST['refer'];
       <!-- Sidebar - Brand -->
       <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
         <div class="sidebar-brand-icon rotate-n-15">
-          <i class="fas fa-laugh-wink"></i>
+          <i class="fas fa-list"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+        <div class="sidebar-brand-text mx-3">Medhub</div>
       </a>
 
       <!-- Divider -->
       <hr class="sidebar-divider my-0">
 
       <!-- Nav Item - Dashboard -->
-      <li class="nav-item active">
+      <li class="nav-item">
         <a class="nav-link" href="index.html">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <i class="fas fa-fw fa-home"></i>
           <span>Dashboard</span></a>
       </li>
 
@@ -75,20 +249,21 @@ $refer = $_POST['refer'];
 
       <!-- Heading -->
       <div class="sidebar-heading">
-        Interface
+        Your info
       </div>
 
       <!-- Nav Item - Pages Collapse Menu -->
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
           <i class="fas fa-fw fa-cog"></i>
-          <span>Components</span>
+          <span>Profile</span>
         </a>
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Custom Components:</h6>
-            <a class="collapse-item" href="buttons.html">Buttons</a>
-            <a class="collapse-item" href="cards.html">Cards</a>
+            <h6 class="collapse-header">Profile:</h6>
+            <a class="collapse-item" href="">Medical history</a>
+            <a class="collapse-item" href="">Social history</a>
+            <a class="collapse-item" href="">Past procedures</a>
           </div>
         </div>
       </li>
@@ -96,16 +271,15 @@ $refer = $_POST['refer'];
       <!-- Nav Item - Utilities Collapse Menu -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
-          <i class="fas fa-fw fa-wrench"></i>
-          <span>Utilities</span>
+          <i class="fas fa-fw fa-clipboard"></i>
+          <span>Reports</span>
         </a>
         <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Custom Utilities:</h6>
-            <a class="collapse-item" href="utilities-color.html">Colors</a>
-            <a class="collapse-item" href="utilities-border.html">Borders</a>
-            <a class="collapse-item" href="utilities-animation.html">Animations</a>
-            <a class="collapse-item" href="utilities-other.html">Other</a>
+            <h6 class="collapse-header">Reports:</h6>
+            <a class="collapse-item" href="reportUser.php">Your reports</a>
+            <a class="collapse-item" href="scan.php">Upload reports</a>
+            <a class="collapse-item" href="hospitalUser.php">Tagged reports</a>
           </div>
         </div>
       </li>
@@ -115,41 +289,30 @@ $refer = $_POST['refer'];
 
       <!-- Heading -->
       <div class="sidebar-heading">
-        Addons
+        Hospitals
       </div>
 
       <!-- Nav Item - Pages Collapse Menu -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-          <i class="fas fa-fw fa-folder"></i>
-          <span>Pages</span>
+          <i class="fas fa-fw fa-list-ul"></i>
+          <span>Manage</span>
         </a>
         <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Login Screens:</h6>
-            <a class="collapse-item" href="login.html">Login</a>
-            <a class="collapse-item" href="register.html">Register</a>
-            <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
-            <div class="collapse-divider"></div>
-            <h6 class="collapse-header">Other Pages:</h6>
-            <a class="collapse-item" href="404.html">404 Page</a>
-            <a class="collapse-item" href="blank.html">Blank Page</a>
+            <h6 class="collapse-header">Manage hospitals:</h6>
+            <a class="collapse-item" href="hospital.php">Add hospitals</a>
+            <a class="collapse-item" href="hospital.php">Remove hospitals</a>
+            <a class="collapse-item" href="hospitalUser.php">Edit permissions</a>
           </div>
         </div>
       </li>
 
       <!-- Nav Item - Charts -->
       <li class="nav-item">
-        <a class="nav-link" href="charts.html">
-          <i class="fas fa-fw fa-chart-area"></i>
-          <span>Charts</span></a>
-      </li>
-
-      <!-- Nav Item - Tables -->
-      <li class="nav-item">
-        <a class="nav-link" href="tables.html">
-          <i class="fas fa-fw fa-table"></i>
-          <span>Tables</span></a>
+        <a class="nav-link" href="">
+          <i class="fas fa-fw fa-eye"></i>
+          <span>View hospitals</span></a>
       </li>
 
       <!-- Divider -->
@@ -214,8 +377,8 @@ $refer = $_POST['refer'];
 
 
             <li class="nav-item my-auto mx-3 text-center">
-              <a href="">
-                <p class="text-primary my-auto">
+              <a href="dashboard.php">
+                <p class="text-muted my-auto">
                 <i class="fas fa-home fa-fw mx-1 mx-auto"></i>
                 <span class="mx-2 hide-nav-home small">Home</span>
               </p>
@@ -250,7 +413,7 @@ $refer = $_POST['refer'];
             </li>
 
             <!-- Nav Item - Alerts -->
-            <li class="nav-item dropdown no-arrow mx-1">
+            <li class="nav-item dropdown no-arrow mx-1 text-muted">
               <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>
                 <!-- Counter - Alerts -->
@@ -268,8 +431,8 @@ $refer = $_POST['refer'];
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 12, 2019</div>
-                    <span class="font-weight-bold">A new monthly report is ready to download!</span>
+                    <div class="small text-gray-500">8/7/20</div>
+                    Brian Kelleher uploaded a report
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -279,8 +442,8 @@ $refer = $_POST['refer'];
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 7, 2019</div>
-                    $290.29 has been deposited into your account!
+                    <div class="small text-gray-500">6/7/20</div>
+                    Aylesbury clinic tagged you in a report
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -290,8 +453,8 @@ $refer = $_POST['refer'];
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 2, 2019</div>
-                    Spending Alert: We've noticed unusually high spending for your account.
+                    <div class="small text-gray-500">5/7/20</div>
+                    Invoice outstanding for 30 days for patient <span class="font-weight-bold text-primary">Derek</span> for €290
                   </div>
                 </a>
                 <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
@@ -315,9 +478,9 @@ $refer = $_POST['refer'];
                     <img class="rounded-circle" src="https://source.unsplash.com/fn_BT9fwg_E/60x60" alt="">
                     <div class="status-indicator bg-success"></div>
                   </div>
-                  <div class="font-weight-bold">
-                    <div class="text-truncate">Hi there! I am wondering if you can help me with a problem I've been having.</div>
-                    <div class="small text-gray-500">Emily Fowler · 58m</div>
+                  <div class="">
+                    <div class="text-truncate">Hi, I have a question about my appointment with Dr. Kelleher.</div>
+                    <div class="small text-gray-500">Derek</div>
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -326,8 +489,8 @@ $refer = $_POST['refer'];
                     <div class="status-indicator"></div>
                   </div>
                   <div>
-                    <div class="text-truncate">I have the photos that you ordered last month, how would you like them sent to you?</div>
-                    <div class="small text-gray-500">Jae Chun · 1d</div>
+                    <div class="text-truncate">Can you send over the report?</div>
+                    <div class="small text-gray-500">Aylesbury Clinic</div>
                   </div>
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -336,18 +499,8 @@ $refer = $_POST['refer'];
                     <div class="status-indicator bg-warning"></div>
                   </div>
                   <div>
-                    <div class="text-truncate">Last month's report looks great, I am very happy with the progress so far, keep up the good work!</div>
-                    <div class="small text-gray-500">Morgan Alvarez · 2d</div>
-                  </div>
-                </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                  <div class="dropdown-list-image mr-3">
-                    <img class="rounded-circle" src="https://source.unsplash.com/Mv9hjnEUHR4/60x60" alt="">
-                    <div class="status-indicator bg-success"></div>
-                  </div>
-                  <div>
-                    <div class="text-truncate">Am I a good boy? The reason I ask is because someone told me that people say this to all dogs, even if they aren't good...</div>
-                    <div class="small text-gray-500">Chicken the Dog · 2w</div>
+                    <div class="text-truncate">Don't charge next patient for consultation</div>
+                    <div class="small text-gray-500">Brian Kelleher</div>
                   </div>
                 </a>
                 <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
@@ -359,8 +512,7 @@ $refer = $_POST['refer'];
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Valerie Luna</span>
-                <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+                <span class="mr-2 d-none d-lg-inline btn btn-primary"><?php echo $firstNameRow . ' ' . $lastNameRow;  ?></span>
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
@@ -391,160 +543,15 @@ $refer = $_POST['refer'];
 
         <!-- Begin Page Content -->
         <div class="container-fluid">
-          <div class="row">
-            <h1 class="display-4 ml-3">Your info</h1>
 
-          </div>
 
           <div class="row">
-            <div class="col-xs-4 col-lg-12 col-md-12 col-sm-12 col-12 mb-3">
-                  <div class="card shadow">
-                    <div class="card-header">
-                      <h4 class="card-title font-weight-bold my-auto">Biometrics</h4>
-                    </div>
-                    <div class="card-body">
-                      <div class="row mb-3">
-                        <div class="col-12">
-                      <div class="card bg-light">
-                        <div class="row my-1">
 
-                          <div class="col-lg-4 col-md-12 col-sm-12 my-auto">
-                            <div class="d-flex justify-content-center border-bottom-item">
-                              <div class="p-1 my-auto">
-                              <span class="fa-stack fa-md mr-1">
-                                <i class="fa fa-circle text-orange fa-stack-2x icon-background"></i>
-                                <i class="fa fa-fire text-white fa-stack-1x"></i>
-                              </span>
-                            </div>
-                            <div class="p-1 my-auto">
-                            <h4 class="font-weight-bold text-orange my-auto">Activity</h4>
-                          </div>
-                          </div>
-                        </div>
-
-                        <div class="col-lg-4 col-md-12 col-sm-12 border-left-item my-auto">
-                          <div class="d-flex justify-content-center border-bottom-item">
-                            <div class="p-1 my-auto">
-                            <span class="fa-stack fa-lg">
-                              <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
-                              <i class="fa fa-running text-orange fa-stack-1x"></i>
-                            </span>
-                          </div>
-                          <div class="p-1 my-auto">
-                          <h4 class="font-weight-bold text-dark my-auto">15,432
-                          <span class="small text-secondary">steps</span></h4>
-                        </div>
-                      </div>
-                        </div>
-
-                        <div class="col-lg-4 col-md-12 col-sm-12 border-left-item my-auto">
-                          <div class="d-flex justify-content-center">
-                            <div class="p-1 my-auto">
-                            <span class="fa-stack fa-lg">
-                              <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
-                              <i class="fa fa-weight text-orange fa-stack-1x"></i>
-                            </span>
-                          </div>
-                          <div class="p-1 my-auto">
-                          <h4 class="font-weight-bold text-dark my-auto">82.3
-                          <span class="small text-secondary mt-auto ml-1">kgs</span></h4>
-                        </div>
-                      </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                      <div class="row mb-3">
-                        <div class="col-12">
-                        <div class="card">
-                          <div class="card-body">
-                          <div class="row">
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                          <p class="card-text font-weight-bold">Steps</p>
-                          <div class="chart-container">
-                    <canvas id="line-chart"></canvas>
-                  </div>
-                  </div>
-                  <div class="col-lg-6 col-md-6 col-sm-12 col-12">
-                    <p class="card-text font-weight-bold">Blood Pressure</p>
-              <canvas id="line-chart1" style="height:100%"></canvas>
-            </div>
-            </div>
-                </div>
-              </div>
-              </div>
-            </div>
-
-            <div class="row mb-3">
-              <div class="col-12">
-            <div class="card bg-light">
-              <div class="row my-1">
-
-                <div class="col-lg-4 col-md-12 col-sm-12 my-auto">
-                  <div class="d-flex justify-content-center border-bottom-item">
-                    <div class="p-1 my-auto">
-                    <span class="fa-stack fa-lg">
-                      <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
-                      <i class="fa fa-tint text-orange fa-stack-1x"></i>
-                    </span>
-                  </div>
-                  <div class="p-1 my-auto">
-                  <h4 class="font-weight-bold text-dark my-auto">120/80
-                  <span class="small text-secondary">mg</span></h4>
-                </div>
-              </div>
-                </div>
-
-              <div class="col-lg-4 col-md-12 col-sm-12 my-auto">
-                <div class="d-flex justify-content-center border-left-item border-bottom-item">
-                  <div class="p-1 my-auto">
-                  <span class="fa-stack fa-lg">
-                    <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
-                    <i class="fa fa-heartbeat text-orange fa-stack-1x"></i>
-                  </span>
-                </div>
-                <div class="p-1 my-auto">
-                <h4 class="font-weight-bold text-dark my-auto">87
-                <span class="small text-secondary">BPM</span></h4>
-              </div>
-            </div>
-              </div>
-
-            <div class="col-lg-4 col-md-12 col-sm-12 border-left-item my-auto">
-              <div class="d-flex justify-content-center">
-                <div class="p-1 my-auto">
-                <span class="fa-stack fa-lg">
-                  <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
-                  <i class="fa fa-arrows-alt-v text-orange fa-stack-1x"></i>
-                </span>
-              </div>
-              <div class="p-1 my-auto">
-              <h4 class="font-weight-bold text-dark my-auto">173
-              <span class="small text-secondary">cm</span></h4>
-            </div>
-          </div>
-            </div>
-            </div>
-
-                    </div>
-                  </div>
-                </div>
-                <hr>
-                <button class="btn btn-orange">Update Profile</button>
-              </div>
-            </div>
-          </div>
             <div class="col-xs-8 col-lg-12 col-md-12 col-sm-12 col-12 mb-3">
-
           <!-- majority of stuff happens here-->
           <div class="row">
-
-            <!-- end left hand column -->
-
             <!-- center column -->
             <div class="col">
-
               <!-- first item -->
             <div class="card shadow mb-3">
               <div class="card-header d-flex justify-content-between">
@@ -554,34 +561,37 @@ $refer = $_POST['refer'];
                 <div class="row">
                 <div class="col-lg-9 col-md-12 col-sm-12 mb-3">
               <form class="row" method="post" action="">
-                <div class="col-md-6">
+                <div class="col-6">
                     <div class="form-group">
                         <label for="account-fn">First Name</label>
-                        <input class="form-control" type="text" id="account-fn" value="Brian" name="firstName" required="">
+                        <?php echo '<input class="form-control" type="text" id="account-fn" name="firstName" value="' . $firstNameRow .'">';?>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-6">
                     <div class="form-group">
                         <label for="account-ln">Last Name</label>
-                        <input class="form-control" type="text" id="account-ln" value="Kelleher" name="lastName" required="">
+                        <?php echo '<input class="form-control" type="text" id="account-ln" name="lastName" value="' . $lastNameRow .'">';?>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="account-email">E-mail Address</label>
-                        <input class="form-control" type="email" id="account-email" value="briankelleher38@gmail.com" name="email" required="">
+                        <?php echo '<input class="form-control" type="email" id="account-email" name="email" value="' . $emailRow .'">';?>
+
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="account-phone">Phone Number</label>
-                        <input class="form-control" type="text" id="account-phone" value="+353 86 849 0405" name="phone" required="">
+                        <?php echo '<input class="form-control" type="text" id="account-phone" name="phone" value="' . $phoneRow .'">';?>
+
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="account-pass">New Password</label>
                         <input class="form-control" type="password" id="account-pass" name="password">
+
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -596,33 +606,15 @@ $refer = $_POST['refer'];
                         <button class="btn btn-style-1 btn-primary" name="submit_basic" type="submit" data-toast-position="topRight" data-toast-type="success" data-toast-icon="fe-icon-check-circle" data-toast-title="Success!" data-toast-message="Your profile updated successfuly.">Update Profile</button>
                     </div>
                 </div>
-            </form>
           </div>
 
           <div class="col-xs-3 col-lg-3 col-md-12 col-sm-12 col-12">
             <div class="card-header">
               Access
             </div>
-            <ul class="list-group">
-              <li class="list-group-item">Santry
-                <span class="float-right">
-                <i class="fas fa-ban fa-fw text-danger"></i>
-              </span>
-              </li>
-              <li class="list-group-item">Neurospine
-                <span class="float-right">
-                <i class="fas fa-ban fa-fw text-danger"></i>
-                </span>
-              </li>
-              <li class="list-group-item text-center">
-                <a href="" class="text-success">
-                Add new
-                <i class="fas fa-plus ml-1"></i>
-                </a>
-              </li>
-
-            </ul>
+            <input name='tagAccess' id="tagInputBasic">
           </div>
+        </form>
         </div>
 
           </div>
@@ -641,90 +633,39 @@ $refer = $_POST['refer'];
             <div class="col-md-12">
                 <div class="form-group">
                     <label for="account-fn">Address 1</label>
-                    <input class="form-control" type="text" id="account-fn" name="address1" value="38 Abington" required="">
+                    <?php echo '<input class="form-control" type="text" id="account-fn" name="address1" value="' . $address1Row .'">';?>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="account-ln">Address 2</label>
-                    <input class="form-control" type="text" id="account-ln" name="address2" value="Malahide" required="">
+                    <?php echo '<input class="form-control" type="text" id="account-ln" name="address2" value="' . $address2Row .'">';?>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="inlineFormCustomSelectPref">County</label>
-                    <select name="county" class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref">
-                      <option>Choose county</option>
-                      <option value="Antrim">Antrim</option>
-                      <option value="Armagh">Armagh</option>
-                      <option value="Carlow">Carlow</option>
-                      <option value="Clare">Clare</option>
-                      <option value="Cork">Cork</option>
-                      <option value="Derry">Derry</option>
-                      <option value="Donegal">Donegal</option>
-                      <option value="Down">Down</option>
-                      <option selected value="Dublin">Dublin</option>
-                      <option value="Fermanagh">Fermanagh</option>
-                      <option value="Galway">Galway</option>
-                      <option value="Kerry">Kerry</option>
-                      <option value="Kildare">Kildare</option>
-                      <option value="Kilkenny">Kilkenny</option>
-                      <option value="Laois">Laois</option>
-                      <option value="Leitrim">Leitrim</option>
-                      <option value="Limerick">Limerick</option>
-                      <option value="Longford">Longford</option>
-                      <option value="Louth">Louth</option>
-                      <option value="Mayo">Mayo</option>
-                      <option value="Meath">Meath</option>
-                      <option value="Monaghan">Monaghan</option>
-                      <option value="Offaly">Offaly</option>
-                      <option value="Roscommon">Roscommon</option>
-                      <option value="Sligo">Sligo</option>
-                      <option value="Tipperary">Tipperary</option>
-                      <option value="Tyrone">Tyrone</option>
-                      <option value="Waterford">Waterford</option>
-                      <option value="Westmeath">Westmeath</option>
-                      <option value="Wexford">Wexford</option>
-                      <option value="Wicklow">Wicklow</option>
-                    </select>
+                    <?php echo '<input class="form-control" type="text" id="account-ln" name="county" value="' . $countyRow .'">';?>
                 </div>
             </div>
 
             <div class="col-12">
                 <hr class="mt-2 mb-3">
                 <div class="d-flex flex-wrap justify-content-between align-items-center">
-                    <button class="btn btn-style-1 btn-primary" type="submit" data-toast="" data-toast-position="topRight" data-toast-type="success" data-toast-icon="fe-icon-check-circle" data-toast-title="Success!" data-toast-message="Your profile updated successfuly.">Update Profile</button>
+                    <button class="btn btn-style-1 btn-primary" name="submit_address" type="submit" data-toast="" data-toast-position="topRight" data-toast-type="success" data-toast-icon="fe-icon-check-circle" data-toast-title="Success!" data-toast-message="Your profile updated successfuly.">Update Profile</button>
                 </div>
             </div>
-        </form>
       </div>
 
       <div class="col-xs-3 col-lg-3 col-md-12 col-sm-12 col-12">
         <div class="card-header">
           Access
         </div>
-        <ul class="list-group">
-          <li class="list-group-item">Santry
-            <span class="float-right">
-            <i class="fas fa-ban fa-fw text-danger"></i>
-          </span>
-          </li>
-          <li class="list-group-item">Neurospine
-            <span class="float-right">
-            <i class="fas fa-ban fa-fw text-danger"></i>
-            </span>
-          </li>
-          <li class="list-group-item text-center">
-            <a href="" class="text-success">
-            Add new
-            <i class="fas fa-plus ml-1"></i>
-            </a>
-          </li>
-
-        </ul>
+        <input name='tagAccessAddress' id="tagInputAddress">
       </div>
     </div>
       </div>
+    </form>
       <!-- Content Row -->
       <!-- Content Row -->
     </div>
@@ -742,58 +683,186 @@ $refer = $_POST['refer'];
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="account-fn">GP</label>
-                    <input class="form-control" type="text" id="account-fn" name="gp" value="Aogon Rooney" required="">
+                    <?php echo '<input class="form-control" type="text" id="account-fn" name="gp" value="' . $gpRow .'">';?>
+
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="account-ln">Referring Doctor</label>
-                    <input class="form-control" type="text" id="account-ln" name="refer" value="N/A" required="">
+                    <?php echo '<input class="form-control" type="text" id="account-ln" name="refer" value="' . $referRow .'">';?>
+
                 </div>
             </div>
 
             <div class="col-12">
                 <hr class="mt-2 mb-3">
                 <div class="d-flex flex-wrap justify-content-between align-items-center">
-                    <button class="btn btn-style-1 btn-primary" type="submit" data-toast="" data-toast-position="topRight" data-toast-type="success" data-toast-icon="fe-icon-check-circle" data-toast-title="Success!" data-toast-message="Your profile updated successfuly.">Update Profile</button>
+                    <button class="btn btn-style-1 btn-primary" name="submit_doctor" type="submit" data-toast="" data-toast-position="topRight" data-toast-type="success" data-toast-icon="fe-icon-check-circle" data-toast-title="Success!" data-toast-message="Your profile updated successfuly.">Update Profile</button>
                 </div>
             </div>
-        </form>
       </div>
 
-      <div class="col-xs-3 col-lg-3 col-md-12 col-sm-12 col-12t">
+      <div class="col-xs-3 col-lg-3 col-md-12 col-sm-12 col-12">
         <div class="card-header">
           Access
         </div>
-        <ul class="list-group">
-          <li class="list-group-item">Santry
-            <span class="float-right">
-            <i class="fas fa-ban fa-fw text-danger"></i>
-          </span>
-          </li>
-          <li class="list-group-item">Neurospine
-            <span class="float-right">
-            <i class="fas fa-ban fa-fw text-danger"></i>
-            </span>
-          </li>
-          <li class="list-group-item text-center">
-            <a href="" class="text-success">
-            Add new
-            <i class="fas fa-plus ml-1"></i>
-            </a>
-          </li>
+        <input name='tagAccess' id="tagInputDoctor">
+      </div>
+    </div>
+      </div>
+      </form>
+      <!-- Content Row -->
+      <!-- Content Row -->
+    </div>
 
-        </ul>
+          <div class="card shadow mb-3">
+            <form action="" method="post">
+            <div class="card-header">
+              <h4 class="card-title font-weight-bold my-auto">Biometrics</h4>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-12">
+              <div class="card bg-light">
+                <div class="row my-1">
+
+                  <div class="col-lg-4 col-md-12 col-sm-12 my-auto">
+                    <div class="d-flex justify-content-center border-bottom-item">
+                      <div class="p-1 my-auto">
+                      <span class="fa-stack fa-md mr-1">
+                        <i class="fa fa-circle text-orange fa-stack-2x icon-background"></i>
+                        <i class="fa fa-fire text-white fa-stack-1x"></i>
+                      </span>
+                    </div>
+                    <div class="p-1 my-auto">
+                    <h4 class="font-weight-bold text-orange my-auto">Activity</h4>
+                  </div>
+                  </div>
+                </div>
+
+                <div class="col-lg-4 col-md-12 col-sm-12 border-left-item my-auto">
+                  <div class="d-flex justify-content-center border-bottom-item">
+                    <div class="p-1 my-auto">
+                    <span class="fa-stack fa-lg">
+                      <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
+                      <i class="fa fa-running text-orange fa-stack-1x"></i>
+                    </span>
+                  </div>
+                  <div class="p-1 my-auto">
+                  <h4 class="font-weight-bold text-dark my-auto">15,432
+                  <span class="small text-secondary">steps</span></h4>
+                </div>
+              </div>
+                </div>
+
+                <div class="col-lg-4 col-md-12 col-sm-12 border-left-item my-auto">
+                  <div class="d-flex justify-content-center">
+                    <div class="p-1 my-auto">
+                    <span class="fa-stack fa-lg">
+                      <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
+                      <i class="fa fa-weight text-orange fa-stack-1x"></i>
+                    </span>
+                  </div>
+                  <div class="p-1 my-auto">
+                  <h4 class="font-weight-bold text-dark my-auto d-flex">
+                    <?php echo '<input class="form-control my-auto" type="text" name="weight" style="width: 100px" value="' . $weightRow .'">';?>
+                  <span class="small text-secondary my-auto ml-1">kgs</span></h4>
+                </div>
+              </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+              <div class="row mb-3">
+                <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                  <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                  <p class="card-text font-weight-bold">Steps</p>
+                  <div class="chart-container">
+            <canvas id="line-chart"></canvas>
+          </div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+            <p class="card-text font-weight-bold">Blood Pressure</p>
+      <canvas id="line-chart1" style="height:100%"></canvas>
+    </div>
+    </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-12">
+    <div class="card bg-light">
+      <div class="row my-1">
+
+        <div class="col-lg-4 col-md-12 col-sm-12 my-auto">
+          <div class="d-flex justify-content-center border-bottom-item">
+            <div class="p-1 my-auto">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
+              <i class="fa fa-tint text-orange fa-stack-1x"></i>
+            </span>
+          </div>
+          <div class="p-1 my-auto">
+          <h4 class="font-weight-bold text-dark my-auto d-flex">
+            <?php echo '<input class="form-control my-auto" type="text" name="blood_pressure" style="width: 100px" value="' . $blood_pressureRow .'">';?>
+          <span class="small text-secondary my-auto ml-1">mg</span></h4>
+        </div>
+      </div>
+        </div>
+
+      <div class="col-lg-4 col-md-12 col-sm-12 my-auto">
+        <div class="d-flex justify-content-center border-left-item border-bottom-item">
+          <div class="p-1 my-auto">
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
+            <i class="fa fa-heartbeat text-orange fa-stack-1x"></i>
+          </span>
+        </div>
+        <div class="p-1 my-auto">
+        <h4 class="font-weight-bold text-dark my-auto d-flex">
+          <?php echo '<input class="form-control my-auto" type="text" name="bpm" style="width: 100px" value="' . $bpmRow .'">';?>
+        <span class="small text-secondary my-auto ml-1">bpm</span></h4>
       </div>
     </div>
       </div>
-      <!-- Content Row -->
-      <!-- Content Row -->
+
+    <div class="col-lg-4 col-md-12 col-sm-12 border-left-item my-auto">
+      <div class="d-flex justify-content-center">
+        <div class="p-1 my-auto">
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-circle text-white fa-stack-2x icon-background"></i>
+          <i class="fa fa-arrows-alt-v text-orange fa-stack-1x"></i>
+        </span>
+      </div>
+      <div class="p-1 my-auto">
+      <h4 class="font-weight-bold text-dark my-auto d-flex">
+        <?php echo '<input class="form-control my-auto" type="text" name="height" style="width: 100px" value="' . $heightRow .'">';?>
+      <span class="small text-secondary my-auto ml-1">cm</span></h4>
     </div>
+  </div>
+    </div>
+    </div>
+
+            </div>
+          </div>
+        </div>
+        <hr>
+        <button name="biometrics" class="btn btn-orange">Update Profile</button>
+      </div>
+    </div>
+  </form>
+
 
     <div class="card shadow mb-3">
       <div class="card-header">
-        <h4 class="card-title font-weight-bold my-auto">Index Info</h4>
+        <h4 class="card-title font-weight-bold my-auto">Pain Index Info</h4>
       </div>
       <div class="card-body">
         <div class="row mb-3">
@@ -961,7 +1030,7 @@ $refer = $_POST['refer'];
     <div class="row">
     <div class="col-lg-9 col-md-12 col-sm-12 mb-3">
 
-  <form class="row mb-3">
+  <form class="row mb-3" method="post" action="">
     <div class="col-md-6">
       <div class="card">
           <div class="card-header">
@@ -1057,35 +1126,17 @@ $refer = $_POST['refer'];
             <button class="btn btn-style-1 btn-danger" type="submit" data-toast="" data-toast-position="topRight" data-toast-type="success" data-toast-icon="fe-icon-check-circle" data-toast-title="Success!" data-toast-message="Your profile updated successfuly.">Update Profile</button>
         </div>
     </div>
+</div>
+
+<div class="col-xs-3 col-lg-3 col-md-12 col-sm-12 col-12">
+  <div class="card-header">
+    Access
+  </div>
+  <input name='tagAccess' id="tagInputBlood">
+</div>
+</div>
+</div>
 </form>
-</div>
-
-<div class="col-xs-3 col-lg-3 col-md-12 col-sm-12 col-12t">
-<div class="card-header">
-  Access
-</div>
-<ul class="list-group">
-  <li class="list-group-item">Santry
-    <span class="float-right">
-    <i class="fas fa-ban fa-fw text-danger"></i>
-  </span>
-  </li>
-  <li class="list-group-item">Neurospine
-    <span class="float-right">
-    <i class="fas fa-ban fa-fw text-danger"></i>
-    </span>
-  </li>
-  <li class="list-group-item text-center">
-    <a href="" class="text-success">
-    Add new
-    <i class="fas fa-plus ml-1"></i>
-    </a>
-  </li>
-
-</ul>
-</div>
-</div>
-</div>
 <!-- Content Row -->
 <!-- Content Row -->
 </div>
@@ -1137,7 +1188,7 @@ $refer = $_POST['refer'];
   <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
   <!-- Custom scripts for all pages-->
-  <script src="js/sb-admin-2.min.js"></script>
+  <script src="js/sb-admin-2.js"></script>
 
   <!-- Page level plugins -->
   <script src="vendor/chart.js/Chart.min.js"></script>
@@ -1147,6 +1198,212 @@ $refer = $_POST['refer'];
   <script src="js/demo/chart-pie-demo.js"></script>
 
   <script>
+  var input = document.getElementById('tagInputBasic'),
+      // init Tagify script on the above inputs
+      tagifyBasic = new Tagify(input, {
+          whitelist : [
+            <?php
+            foreach ($tagList as $tag) {
+              echo '"' . $tag['name'] . '",';
+            }
+            ?>
+          ],
+          dropdown: {
+              position: "manual",
+              maxItems: Infinity,
+              enabled: 0,
+              classname: "customSuggestionsList"
+          },
+          enforceWhitelist: false
+      })
+
+      tagifyBasic.addTags([
+        <?php
+        echo $basic_accessRow;
+        ?>
+      ])
+
+      tagifyBasic.on("dropdown:show", onSuggestionsListUpdateBasic)
+            .on("dropdown:hide", onSuggestionsListHideBasic)
+            .on('dropdown:scroll', onDropdownScrollBasic)
+
+      renderSuggestionsListBasic()
+
+      // ES2015 argument destructuring
+      function onSuggestionsListUpdateBasic({ detail:suggestionsElm }){
+          console.log(  suggestionsElm  )
+      }
+
+      function onSuggestionsListHideBasic(){
+          console.log("hide dropdown")
+      }
+
+      function onDropdownScrollBasic(e){
+          console.log(e.detail)
+        }
+
+      // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement
+      function renderSuggestionsListBasic(){
+          tagifyBasic.dropdown.show.call(tagifyBasic) // load the list
+          tagifyBasic.DOM.scope.parentNode.appendChild(tagifyBasic.DOM.dropdown)
+      }
+
+
+
+      var inputAddress = document.getElementById('tagInputAddress'),
+          // init Tagify script on the above inputs
+          tagifyAddress = new Tagify(inputAddress, {
+              whitelist : [
+                <?php
+                foreach ($tagList as $tag) {
+                  echo '"' . $tag['name'] . '",';
+                }
+                ?>
+              ],
+              dropdown: {
+                  position: "manual",
+                  maxItems: Infinity,
+                  enabled: 0,
+                  classname: "customSuggestionsList"
+              },
+              enforceWhitelist: false
+          })
+
+          tagifyAddress.addTags([
+            <?php
+            echo $address_accessRow;
+            ?>
+          ])
+
+          tagifyAddress.on("dropdown:show", onSuggestionsListUpdateAddress)
+                .on("dropdown:hide", onSuggestionsListHideAddress)
+                .on('dropdown:scroll', onDropdownScrollAddress)
+
+          renderSuggestionsListAddress()
+
+          // ES2015 argument destructuring
+          function onSuggestionsListUpdateAddress({ detail:suggestionsElm }){
+              console.log(  suggestionsElm  )
+          }
+
+          function onSuggestionsListHideAddress(){
+              console.log("hide dropdown")
+          }
+
+          function onDropdownScrollAddress(e){
+              console.log(e.detail)
+            }
+
+          // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement
+          function renderSuggestionsListAddress(){
+              tagifyAddress.dropdown.show.call(tagifyAddress) // load the list
+              tagifyAddress.DOM.scope.parentNode.appendChild(tagifyAddress.DOM.dropdown)
+          }
+
+
+
+
+          var inputDoctor = document.getElementById('tagInputDoctor'),
+              // init Tagify script on the above inputs
+              tagifyDoctor = new Tagify(inputDoctor, {
+                  whitelist : [
+                    <?php
+                    foreach ($tagList as $tag) {
+                      echo '"' . $tag['name'] . '",';
+                    }
+                    ?>
+                  ],
+                  dropdown: {
+                      position: "manual",
+                      maxItems: Infinity,
+                      enabled: 0,
+                      classname: "customSuggestionsList"
+                  },
+                  enforceWhitelist: false
+              })
+
+              tagifyDoctor.addTags([
+                <?php
+                echo $doctor_accessRow;
+                ?>
+              ])
+
+              tagifyDoctor.on("dropdown:show", onSuggestionsListUpdateDoctor)
+                    .on("dropdown:hide", onSuggestionsListHideDoctor)
+                    .on('dropdown:scroll', onDropdownScrollDoctor)
+
+              renderSuggestionsListDoctor()
+
+              // ES2015 argument destructuring
+              function onSuggestionsListUpdateDoctor({ detail:suggestionsElm }){
+                  console.log(  suggestionsElm  )
+              }
+
+              function onSuggestionsListHideDoctor(){
+                  console.log("hide dropdown")
+              }
+
+              function onDropdownScrollDoctor(e){
+                  console.log(e.detail)
+                }
+
+              // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement
+              function renderSuggestionsListDoctor(){
+                  tagifyDoctor.dropdown.show.call(tagifyDoctor) // load the list
+                  tagifyDoctor.DOM.scope.parentNode.appendChild(tagifyDoctor.DOM.dropdown)
+              }
+
+
+              var input = document.getElementById('tagInputBlood'),
+                  // init Tagify script on the above inputs
+                  tagifyBlood = new Tagify(input, {
+                      whitelist : [
+                        <?php
+                        foreach ($tagList as $tag) {
+                          echo '"' . $tag['name'] . '",';
+                        }
+                        ?>
+                      ],
+                      dropdown: {
+                          position: "manual",
+                          maxItems: Infinity,
+                          enabled: 0,
+                          classname: "customSuggestionsList"
+                      },
+                      enforceWhitelist: false
+                  })
+
+                  tagifyBlood.addTags([
+                    <?php
+                    echo $blood_accessRow;
+                    ?>
+                  ])
+
+                  tagifyBlood.on("dropdown:show", onSuggestionsListUpdate)
+                        .on("dropdown:hide", onSuggestionsListHide)
+                        .on('dropdown:scroll', onDropdownScroll)
+
+                  renderSuggestionsList()
+
+                  // ES2015 argument destructuring
+                  function onSuggestionsListUpdate({ detail:suggestionsElm }){
+                      console.log(  suggestionsElm  )
+                  }
+
+                  function onSuggestionsListHide(){
+                      console.log("hide dropdown")
+                  }
+
+                  function onDropdownScroll(e){
+                      console.log(e.detail)
+                    }
+
+                  // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement
+                  function renderSuggestionsList(){
+                      tagifyBlood.dropdown.show.call(tagifyBlood) // load the list
+                      tagifyBlood.DOM.scope.parentNode.appendChild(tagifyBlood.DOM.dropdown)
+                  }
+
 
   var chartColors = {
   red: 'rgb(255, 99, 132)',

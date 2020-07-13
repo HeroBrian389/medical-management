@@ -1,3 +1,8 @@
+window.onload = redefine();
+function redefine() {
+  $("body").toggleClass("sidebar-toggled");
+  $(".sidebar").toggleClass("toggled");
+}
 (function($) {
   "use strict"; // Start of use strict
 
@@ -15,9 +20,9 @@
     if ($(window).width() < 768) {
       $('.sidebar .collapse').collapse('hide');
     };
-    
+
     // Toggle the side navigation when window is resized below 480px
-    if ($(window).width() < 480 && !$(".sidebar").hasClass("toggled")) {
+    if ($(window).width() < 600 && !$(".sidebar").hasClass("toggled")) {
       $("body").addClass("sidebar-toggled");
       $(".sidebar").addClass("toggled");
       $('.sidebar .collapse').collapse('hide');
